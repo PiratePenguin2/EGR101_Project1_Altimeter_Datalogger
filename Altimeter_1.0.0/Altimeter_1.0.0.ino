@@ -76,17 +76,6 @@ void displayMenu(int id, bool clear=false, bool update=false) {
       break;
   }
 
-/*
-  if (id == 0) {
-    display.println("Menu 0");
-  } else if (id == 1) {
-    display.println("Menu 1");
-  } else if (id == 2) {
-    display.println("Menu 2");
-  } else if (id == 3) {
-    display.println("Menu 3");
-  }*/
-
   if (update) {
     display.display();
   }
