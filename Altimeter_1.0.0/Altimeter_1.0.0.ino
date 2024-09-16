@@ -20,41 +20,17 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define BUTTON_3_PIN 3
 #define BUTTON_4_PIN 4
 
-
-void testscrolltext(void) {
-  display.clearDisplay();
-
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("scroll"));
-  display.display();      // Show initial text
-  delay(100);
-
-  // Scroll in various directions, pausing in-between:
-  display.startscrollright(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrollleft(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrolldiagright(0x00, 0x07);
-  delay(2000);
-  display.startscrolldiagleft(0x00, 0x07);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-}
-
+int menuId = 0;
+bool menuActive = false;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
+  menuId = id;
+
   if (clear) {
     display.clearDisplay();
   }
 
-  switch(id) {
+  switch(menuId) {
     case 0:
       display.println("Menu 0");
       break;
@@ -82,26 +58,6 @@ void displayMenu(int id, bool clear=false, bool update=false) {
 
 }
 
-bool getButton1() {
-  bool state = digitalRead(BUTTON_1_PIN == HIGH);
-  return state ? true : false;
-}
-bool getButton2() {
-  bool state = digitalRead(BUTTON_2_PIN == HIGH);
-  return state ? true : false;
-}
-bool getButton3() {
-  bool state = digitalRead(BUTTON_3_PIN == HIGH);
-  return state ? true : false;
-}
-bool getButton4() {
-  bool state = digitalRead(BUTTON_4_PIN == HIGH);
-  return state ? true : false;
-}
-
-
-int id = 0;
-bool menuActive = false;
 
 void setup() {
   Serial.begin(9600);
@@ -138,14 +94,14 @@ void loop() {
 
   if (menuActive) {
     if (getButton2()) {
-      if (id >= 3) {
-        id = 0;
+      if (menuId >= 3) {
+        menuId = 0;
       } else {
-        id += 1;
+        menuId += 1;
       }
     } 
     while (getButton2()) {}
-    displayMenu(id, true, true);
+    displayMenu(menuId, true, true);
   } else {
     //do something else, show static page
   }
@@ -154,4 +110,49 @@ void loop() {
 
   
 
+}
+
+
+void testscrolltext(void) {
+  display.clearDisplay();
+
+  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+  display.println(F("scroll"));
+  display.display();      // Show initial text
+  delay(100);
+
+  // Scroll in various directions, pausing in-between:
+  display.startscrollright(0x00, 0x0F);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+  display.startscrollleft(0x00, 0x0F);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+  display.startscrolldiagright(0x00, 0x07);
+  delay(2000);
+  display.startscrolldiagleft(0x00, 0x07);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+}
+
+bool getButton1() {
+  bool state = digitalRead(BUTTON_1_PIN == HIGH);
+  return state ? true : false;
+}
+bool getButton2() {
+  bool state = digitalRead(BUTTON_2_PIN == HIGH);
+  return state ? true : false;
+}
+bool getButton3() {
+  bool state = digitalRead(BUTTON_3_PIN == HIGH);
+  return state ? true : false;
+}
+bool getButton4() {
+  bool state = digitalRead(BUTTON_4_PIN == HIGH);
+  return state ? true : false;
 }
