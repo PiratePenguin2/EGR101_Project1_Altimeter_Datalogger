@@ -54,6 +54,29 @@ void displayMenu(int id, bool clear=false, bool update=false) {
     display.clearDisplay();
   }
 
+  switch(id) {
+    case 0:
+      display.println("Menu 0");
+      break;
+    
+    case 1:
+      display.println("Menu 1");
+      break;
+    
+    case 2:
+      display.println("Menu 2");
+      break;
+
+    case 3:
+      display.println("Menu 3");
+      break;
+    
+    default:
+      display.println("Undefined Menu");
+      break;
+  }
+
+/*
   if (id == 0) {
     display.println("Menu 0");
   } else if (id == 1) {
@@ -62,7 +85,7 @@ void displayMenu(int id, bool clear=false, bool update=false) {
     display.println("Menu 2");
   } else if (id == 3) {
     display.println("Menu 3");
-  }
+  }*/
 
   if (update) {
     display.display();
