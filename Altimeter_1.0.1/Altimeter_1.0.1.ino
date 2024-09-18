@@ -105,20 +105,15 @@ void setup() {
 
   btn1.attach(BUTTON_1_PIN);
 
-  /*pinMode(BUTTON_1_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_2_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_3_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_4_PIN, INPUT_PULLUP);*/
-
 
 }
 
 void loop() {
 
-  if (btn1.isUntripped()) {
+  if (btn1.isTripped()) {
     Serial.println("Button 1 is pressed");
   }
-  if (btn1.isTripped()) {
+  if (btn1.isUntripped()) {
     Serial.println("Button 1 is not pressed");
   }
   Serial.println(btn1.read());
