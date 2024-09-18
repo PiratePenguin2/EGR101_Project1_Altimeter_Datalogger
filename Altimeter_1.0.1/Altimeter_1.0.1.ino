@@ -7,6 +7,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "Sensor.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -23,8 +24,14 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 int menuId = 0;
 bool menuActive = true;
 
+Sensor btn1;
+
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
+
+  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
 
   if (clear) {
     display.clearDisplay();
@@ -32,25 +39,49 @@ void displayMenu(int id, bool clear=false, bool update=false) {
 
   switch(menuId) {
     case 0:
-      display.println("Menu 0");
+      display.setCursor(10, 0);
+      display.println("Current");
+      display.setCursor(10, 16);
+      display.println("Altitude");
       break;
     
     case 1:
-      display.println("Menu 1");
+      display.setCursor(10, 0);
+      display.println("Max");
+      display.setCursor(10, 16);
+      display.println("Altitude");
       break;
     
     case 2:
-      display.println("Menu 2");
+      display.println("Status");
       break;
 
     case 3:
-      display.println("Menu 3");
+      display.println("Preferences");
       break;
     
     default:
       display.println("Undefined Menu");
       break;
   }
+
+  if (update) {
+    display.display();
+  }
+
+}
+
+void displayScreen(int id, bool clear=false, bool update=false) {
+  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+
+  if (clear) {
+    display.clearDisplay();
+  }
+
+  display.println("Active Page");
+
 
   if (update) {
     display.display();
@@ -72,50 +103,52 @@ void setup() {
 
   //testscrolltext();    // Draw scrolling text
 
-  pinMode(BUTTON_1_PIN, INPUT_PULLUP);
+  btn1.attach(BUTTON_1_PIN);
+
+  /*pinMode(BUTTON_1_PIN, INPUT_PULLUP);
   pinMode(BUTTON_2_PIN, INPUT_PULLUP);
   pinMode(BUTTON_3_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_4_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_4_PIN, INPUT_PULLUP);*/
 
 
 }
 
 void loop() {
 
-  if (getButton1()) {
-    Serial.println("Button 1 Pressed");
+  if (btn1.isTripped()) {
+    Serial.println("Button 1 is pressed");
+  } else if (btn1.isUntripped()) {
+    Serial.println("Button 1 is not pressed");
+  }
+
+  /*if (getButton1()) {
     if (menuActive) {
       menuActive = false;
-      Serial.println("Waiting to release");
       bool state = true;
       while (state) {state=getButton1();}
     } else {
       menuActive = true;
-      while (getButton1()) {}
+      bool state = true;
+      while (state) {state=getButton1();}
       Serial.println("Button 1 Released");
     }
   }
 
   if (menuActive) {
     if (getButton2()) {
-      Serial.println("Button 2 Pressed");
       if (menuId >= 3) {
         menuId = 0;
       } else {
         menuId += 1;
       }
-    } 
-    bool state = true;
-    while (state) {state = getButton2();}
-    Serial.println("Button 2 Released");
+      bool state = true;
+      while (state) {state = getButton2();}
+    }
     displayMenu(menuId, true, true);
   } else {
+    displayScreen(menuId, true, true);
     //do something else, show static page
-  }
-
-
-
-  
+  }*/
 
 }
 
@@ -148,18 +181,18 @@ void testscrolltext(void) {
 }
 
 bool getButton1() {
-  bool state = digitalRead(BUTTON_1_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_1_PIN) == LOW;
   return state ? true : false;
 }
 bool getButton2() {
-  bool state = digitalRead(BUTTON_2_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_2_PIN) == LOW;
   return state ? true : false;
 }
 bool getButton3() {
-  bool state = digitalRead(BUTTON_3_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_3_PIN) == LOW;
   return state ? true : false;
 }
 bool getButton4() {
-  bool state = digitalRead(BUTTON_4_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_4_PIN) == LOW;
   return state ? true : false;
 }

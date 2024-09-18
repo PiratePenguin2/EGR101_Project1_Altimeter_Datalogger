@@ -1,29 +1,16 @@
 #include "Sensor.h"
 #include <Wire.h>
 
-Sensor::Sensor() : _pcf(nullptr), _usingPCF(false) {}
+Sensor::Sensor() {}
 
 void Sensor::attach(uint8_t pin) {
   _pin = pin;
-  _usingPCF = false;
-  pinMode(_pin, INPUT);
-}
-
-void Sensor::attach(uint8_t pin, Adafruit_PCF8574 &pcf) {
-  _pin = pin;
-  _pcf = &pcf;
-  _usingPCF = true;
-  _pcf->pinMode(_pin, INPUT);
+  pinMode(_pin, INPUT_PULLUP);
 }
 
 bool Sensor::read() {  
-  if (_usingPCF) {
-    storedState = _pcf->digitalRead(_pin); // Assuming active-low for buttons/sensors
-    return storedState;
-  } else {
-    storedState = digitalRead(_pin);
-    return storedState;
-  }
+  storedState = digitalRead(_pin);
+  return storedState;
 }
 
 bool Sensor::isTripped()
@@ -48,15 +35,6 @@ bool Sensor::isUntripped()
     return true;
   }
   return false;
-}
-
-int Sensor::analogRead() {
-  if (_usingPCF) {
-    // Analog reading is not possible through PCF8574; return -1 or handle accordingly
-    return -1;
-  } else {
-    return ::analogRead(_pin);
-  }
 }
 
 void Sensor::count() {
