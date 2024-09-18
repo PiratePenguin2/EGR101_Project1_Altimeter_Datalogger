@@ -26,31 +26,59 @@ bool menuActive = true;
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
 
+  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+
   if (clear) {
     display.clearDisplay();
   }
 
   switch(menuId) {
     case 0:
-      display.println("Menu 0");
+      display.setCursor(10, 0);
+      display.println("Current");
+      display.setCursor(10, 16);
+      display.println("Altitude");
       break;
     
     case 1:
-      display.println("Menu 1");
+      display.setCursor(10, 0);
+      display.println("Max");
+      display.setCursor(10, 16);
+      display.println("Altitude");
       break;
     
     case 2:
-      display.println("Menu 2");
+      display.println("Status");
       break;
 
     case 3:
-      display.println("Menu 3");
+      display.println("Preferences");
       break;
     
     default:
       display.println("Undefined Menu");
       break;
   }
+
+  if (update) {
+    display.display();
+  }
+
+}
+
+void displayScreen(int id, bool clear=false, bool update=false) {
+  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+
+  if (clear) {
+    display.clearDisplay();
+  }
+
+  display.println("Active Page");
+
 
   if (update) {
     display.display();
@@ -83,12 +111,12 @@ void setup() {
 void loop() {
 
   if (getButton1()) {
-    Serial.println("Button 1 Pressed");
     if (menuActive) {
       menuActive = false;
       bool state = true;
       while (state) {state=getButton1();}
     } else {
+      menuActive = true;
       bool state = true;
       while (state) {state=getButton1();}
       Serial.println("Button 1 Released");
@@ -97,24 +125,19 @@ void loop() {
 
   if (menuActive) {
     if (getButton2()) {
-      Serial.println("Button 2 Pressed");
       if (menuId >= 3) {
         menuId = 0;
       } else {
         menuId += 1;
       }
-    } 
-    bool state = true;
-    while (state) {state = getButton2();}
-    Serial.println("Button 2 Released");
+      bool state = true;
+      while (state) {state = getButton2();}
+    }
     displayMenu(menuId, true, true);
   } else {
+    displayScreen(menuId, true, true);
     //do something else, show static page
   }
-
-
-
-  
 
 }
 
