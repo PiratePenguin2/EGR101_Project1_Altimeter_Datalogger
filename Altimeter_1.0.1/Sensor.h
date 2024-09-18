@@ -15,9 +15,11 @@ public:
 
     // Checks if the sensor was tripped (transition from HIGH to LOW)
     bool isTripped();
+    bool isTripped(bool updateState);
 
     // Checks if the sensor was untripped (transition from LOW to HIGH)
     bool isUntripped();
+    bool isUntripped(bool updateState);
 
     // Increments the internal count
     void count();
@@ -31,7 +33,9 @@ public:
 private:
     uint8_t _pin;                    // The pin number on Arduino or PCF8574
     bool storedState;                // Stores the last read state
+    bool currentState;               // Stores the current state
     int _count = 0;                  // Counter for tripped events
+
 
 };
 

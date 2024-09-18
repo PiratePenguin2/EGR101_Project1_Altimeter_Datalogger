@@ -115,7 +115,7 @@ void loop() {
   }
   delay(50);
 
-  if (btn1.isUntripped()) {
+  if (btn1.isUntripped(false)) {
     Serial.println("Button 1 is not pressed");
   }
   Serial.println(btn1.read());
