@@ -15,13 +15,13 @@
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-#define BUTTON_1_PIN 1
-#define BUTTON_2_PIN 2
+#define BUTTON_1_PIN 14
+#define BUTTON_2_PIN 12
 #define BUTTON_3_PIN 3
 #define BUTTON_4_PIN 4
 
 int menuId = 0;
-bool menuActive = false;
+bool menuActive = true;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
@@ -70,7 +70,7 @@ void setup() {
   display.display();
   display.clearDisplay();
 
-  testscrolltext();    // Draw scrolling text
+  //testscrolltext();    // Draw scrolling text
 
   pinMode(BUTTON_1_PIN, INPUT_PULLUP);
   pinMode(BUTTON_2_PIN, INPUT_PULLUP);
@@ -83,24 +83,31 @@ void setup() {
 void loop() {
 
   if (getButton1()) {
+    Serial.println("Button 1 Pressed");
     if (menuActive) {
       menuActive = false;
-      while (getButton1()) {}
+      Serial.println("Waiting to release");
+      bool state = true;
+      while (state) {state=getButton1();}
     } else {
       menuActive = true;
       while (getButton1()) {}
+      Serial.println("Button 1 Released");
     }
   }
 
   if (menuActive) {
     if (getButton2()) {
+      Serial.println("Button 2 Pressed");
       if (menuId >= 3) {
         menuId = 0;
       } else {
         menuId += 1;
       }
     } 
-    while (getButton2()) {}
+    bool state = true;
+    while (state) {state = getButton2();}
+    Serial.println("Button 2 Released");
     displayMenu(menuId, true, true);
   } else {
     //do something else, show static page
@@ -141,18 +148,18 @@ void testscrolltext(void) {
 }
 
 bool getButton1() {
-  bool state = digitalRead(BUTTON_1_PIN == HIGH);
+  bool state = digitalRead(BUTTON_1_PIN) == HIGH;
   return state ? true : false;
 }
 bool getButton2() {
-  bool state = digitalRead(BUTTON_2_PIN == HIGH);
+  bool state = digitalRead(BUTTON_2_PIN) == HIGH;
   return state ? true : false;
 }
 bool getButton3() {
-  bool state = digitalRead(BUTTON_3_PIN == HIGH);
+  bool state = digitalRead(BUTTON_3_PIN) == HIGH;
   return state ? true : false;
 }
 bool getButton4() {
-  bool state = digitalRead(BUTTON_4_PIN == HIGH);
+  bool state = digitalRead(BUTTON_4_PIN) == HIGH;
   return state ? true : false;
 }
