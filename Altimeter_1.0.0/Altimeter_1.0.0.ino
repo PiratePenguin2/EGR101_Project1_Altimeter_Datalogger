@@ -86,12 +86,11 @@ void loop() {
     Serial.println("Button 1 Pressed");
     if (menuActive) {
       menuActive = false;
-      Serial.println("Waiting to release");
       bool state = true;
       while (state) {state=getButton1();}
     } else {
-      menuActive = true;
-      while (getButton1()) {}
+      bool state = true;
+      while (state) {state=getButton1();}
       Serial.println("Button 1 Released");
     }
   }
@@ -148,18 +147,18 @@ void testscrolltext(void) {
 }
 
 bool getButton1() {
-  bool state = digitalRead(BUTTON_1_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_1_PIN) == LOW;
   return state ? true : false;
 }
 bool getButton2() {
-  bool state = digitalRead(BUTTON_2_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_2_PIN) == LOW;
   return state ? true : false;
 }
 bool getButton3() {
-  bool state = digitalRead(BUTTON_3_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_3_PIN) == LOW;
   return state ? true : false;
 }
 bool getButton4() {
-  bool state = digitalRead(BUTTON_4_PIN) == HIGH;
+  bool state = digitalRead(BUTTON_4_PIN) == LOW;
   return state ? true : false;
 }
