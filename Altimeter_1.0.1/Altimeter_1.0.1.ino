@@ -7,6 +7,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "Sensor.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -22,6 +23,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 int menuId = 0;
 bool menuActive = true;
+
+Sensor btn1;
+Sensor btn2;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
@@ -72,17 +76,20 @@ void setup() {
 
   //testscrolltext();    // Draw scrolling text
 
-  pinMode(BUTTON_1_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_2_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_3_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_4_PIN, INPUT_PULLUP);
+  btn1.attach(BUTTON_1_PIN);
+  btn2.attach(BUTTON_2_PIN);
+
+  //pinMode(BUTTON_1_PIN, INPUT_PULLUP);
+  //pinMode(BUTTON_2_PIN, INPUT_PULLUP);
+  //pinMode(BUTTON_3_PIN, INPUT_PULLUP);
+  //pinMode(BUTTON_4_PIN, INPUT_PULLUP);
 
 
 }
 
 void loop() {
 
-  if (getButton1()) {
+  /*if (getButton1()) {
     Serial.println("Button 1 Pressed");
     if (menuActive) {
       menuActive = false;
@@ -111,9 +118,15 @@ void loop() {
     displayMenu(menuId, true, true);
   } else {
     //do something else, show static page
+  }*/
+
+  if (btn1.isTripped()) {
+    Serial.println("Button 1 pressed");
   }
-
-
+  else if (btn1.isUntripped())
+  {
+    Serial.println("Button 1 not pressed");
+  }
 
   
 
