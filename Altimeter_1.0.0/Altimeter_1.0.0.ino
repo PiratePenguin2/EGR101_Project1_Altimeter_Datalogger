@@ -22,6 +22,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 int menuId = 0;
 bool menuActive = true;
+bool liveCapture = true;
+bool manualCapture = false;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
@@ -78,6 +80,15 @@ void displayScreen(int id, bool clear=false, bool update=false) {
   switch(menuId) {
     case 0:
       display.println("Current Altitude");
+      display.setTextSize(2);
+      display.setCursor(70, 11);
+      display.println("000m");
+      display.setTextSize(1.5);
+      display.setCursor(10, 20);
+      if (liveCapture) {
+        display.fillCircle(5, 23, 2, SSD1306_WHITE);
+        display.println("REC");
+      }
       break;
     
     case 1:
@@ -85,6 +96,12 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.setTextSize(2);
       display.setCursor(70, 11);
       display.println("000m");
+      display.setTextSize(1.5);
+      display.setCursor(10, 20);
+      if (liveCapture) {
+        display.fillCircle(5, 23, 2, SSD1306_WHITE);
+        display.println("REC");
+      }
       break;
     
     case 2:
