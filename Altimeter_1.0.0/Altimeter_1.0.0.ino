@@ -107,15 +107,52 @@ void displayScreen(int id, bool clear=false, bool update=false) {
 
 }
 
-void swipeAnimation() {
-  int swipeSpeed = 10; // Speed of swipe, increase to make it faster
+void swipeDown() {
+  int swipeSpeed = 7; // Speed of swipe, increase to make it faster
+
+  for (int y = 0; y <= SCREEN_HEIGHT+10; y += swipeSpeed) {
+    
+    // Draw a black rectangle swiping from top to bottom
+    display.fillRect(0, SCREEN_HEIGHT - y, SCREEN_WIDTH, y, SSD1306_BLACK);
+    
+    // Update the display
+    display.display();
+    
+    delay(40); // Adjust delay for smoother animation
+  }
+
+  // Make sure the screen is completely cleared
+  display.clearDisplay();
+  display.display();
+}
+
+void swipeRight() {
+  int swipeSpeed = 14; // Speed of swipe, increase to make it faster
 
   for (int x = 0; x <= SCREEN_WIDTH; x += swipeSpeed) {
-    // Clear the display
-    display.clearDisplay();
     
     // Draw a black rectangle swiping from right to left
     display.fillRect(SCREEN_WIDTH - x, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_BLACK);
+    
+    // Update the display
+    display.display();
+    
+    delay(30); // Adjust delay for smoother animation
+  }
+
+  // Make sure the screen is completely cleared
+  display.clearDisplay();
+  display.display();
+}
+
+void swipeLeft() {
+  int swipeSpeed = 14; // Speed of swipe, increase to make it faster
+
+  for (int x = 0; x <= SCREEN_WIDTH; x += swipeSpeed) {
+    
+    // Draw a black rectangle swiping from right to left
+    display.fillRect(0, 0, x, SCREEN_HEIGHT, SSD1306_BLACK);
+
     
     // Update the display
     display.display();
@@ -141,7 +178,6 @@ void setup() {
   display.clearDisplay();
 
 
-  swipeAnimation();
   //testscrolltext();    // Draw scrolling text
 
   pinMode(BUTTON_1_PIN, INPUT_PULLUP);
@@ -159,12 +195,12 @@ void loop() {
       menuActive = false;
       bool state = true;
       while (state) {state=getButton1();}
-      swipeAnimation();
+      swipeRight();
     } else {
       menuActive = true;
       bool state = true;
       while (state) {state=getButton1();}
-      swipeAnimation();
+      swipeLeft();
     }
   }
 
@@ -172,10 +208,10 @@ void loop() {
     if (getButton2()) {
       if (menuId >= 3) {
         menuId = 0;
-        swipeAnimation();
+        swipeDown();
       } else {
         menuId += 1;
-        swipeAnimation();
+        swipeDown();
       }
       bool state = true;
       while (state) {state = getButton2();}
