@@ -17,7 +17,7 @@ bool Sensor::isTripped()
 {
   bool oldState = storedState;
   bool newState = this->read();
-  if (oldState == HIGH && newState == LOW)
+  if (oldState == LOW && newState == HIGH)
   {
     //this->count();
     return true;
@@ -29,7 +29,7 @@ bool Sensor::isUntripped()
 {
   bool oldState = storedState;
   bool newState = this->read();
-  if (oldState == LOW && newState == HIGH)
+  if (oldState == HIGH && newState == LOW)
   {
     //this->count();
     return true;

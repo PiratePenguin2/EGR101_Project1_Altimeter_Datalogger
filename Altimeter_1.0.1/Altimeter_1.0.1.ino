@@ -115,11 +115,14 @@ void setup() {
 
 void loop() {
 
-  if (btn1.isTripped()) {
+  if (btn1.isUntripped()) {
     Serial.println("Button 1 is pressed");
-  } else if (btn1.isUntripped()) {
+  }
+  if (btn1.isTripped()) {
     Serial.println("Button 1 is not pressed");
   }
+  Serial.println(btn1.read());
+  delay(100);
 
   /*if (getButton1()) {
     if (menuActive) {

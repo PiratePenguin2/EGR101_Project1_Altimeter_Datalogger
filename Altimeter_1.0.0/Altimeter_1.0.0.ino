@@ -83,7 +83,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
     case 1:
       display.println("Max Altitude");
       display.setTextSize(3);
-      display.setCursor(80, 16);
+      display.setCursor(80, 11);
       display.println("000m");
       break;
     
