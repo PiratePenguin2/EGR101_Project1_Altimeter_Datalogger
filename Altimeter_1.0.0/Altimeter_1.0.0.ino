@@ -69,7 +69,7 @@ void displayMenu(int id, bool clear=false, bool update=false) {
 void displayScreen(int id, bool clear=false, bool update=false) {
   display.setTextSize(1); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(5, 0);
+  display.setCursor(0, 0);
 
   if (clear) {
     display.clearDisplay();
@@ -82,8 +82,8 @@ void displayScreen(int id, bool clear=false, bool update=false) {
     
     case 1:
       display.println("Max Altitude");
-      display.setTextSize(3);
-      display.setCursor(80, 11);
+      display.setTextSize(2);
+      display.setCursor(70, 11);
       display.println("000m");
       break;
     
@@ -107,6 +107,27 @@ void displayScreen(int id, bool clear=false, bool update=false) {
 
 }
 
+void swipeAnimation() {
+  int swipeSpeed = 10; // Speed of swipe, increase to make it faster
+
+  for (int x = 0; x <= SCREEN_WIDTH; x += swipeSpeed) {
+    // Clear the display
+    display.clearDisplay();
+    
+    // Draw a black rectangle swiping from right to left
+    display.fillRect(SCREEN_WIDTH - x, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_BLACK);
+    
+    // Update the display
+    display.display();
+    
+    delay(30); // Adjust delay for smoother animation
+  }
+
+  // Make sure the screen is completely cleared
+  display.clearDisplay();
+  display.display();
+}
+
 
 void setup() {
   Serial.begin(9600);
@@ -119,6 +140,8 @@ void setup() {
   display.display();
   display.clearDisplay();
 
+
+  swipeAnimation();
   //testscrolltext();    // Draw scrolling text
 
   pinMode(BUTTON_1_PIN, INPUT_PULLUP);
@@ -136,11 +159,12 @@ void loop() {
       menuActive = false;
       bool state = true;
       while (state) {state=getButton1();}
+      swipeAnimation();
     } else {
       menuActive = true;
       bool state = true;
       while (state) {state=getButton1();}
-      Serial.println("Button 1 Released");
+      swipeAnimation();
     }
   }
 
@@ -148,8 +172,10 @@ void loop() {
     if (getButton2()) {
       if (menuId >= 3) {
         menuId = 0;
+        swipeAnimation();
       } else {
         menuId += 1;
+        swipeAnimation();
       }
       bool state = true;
       while (state) {state = getButton2();}
