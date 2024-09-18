@@ -8,27 +8,17 @@ void Sensor::attach(uint8_t pin) {
   pinMode(_pin, INPUT_PULLUP);
 }
 
-bool Sensor::read() {  
-  storedState = currentState;
+void Sensor::update() {  
+  oldState = currentState;
   currentState = digitalRead(_pin);
+}
+
+bool Sensor::read() {
   return currentState;
 }
 
 bool Sensor::isTripped() {
-  this->read();
-  if (storedState == HIGH && currentState == LOW)
-  {
-    //this->count();
-    return true;
-  }
-  return false;
-}
-
-bool Sensor::isTripped(bool updateState) {
-  if (updateState) {
-  this->read();
-  }
-  if (storedState == HIGH && currentState == LOW)
+  if (oldState == HIGH && currentState == LOW)
   {
     //this->count();
     return true;
@@ -37,20 +27,7 @@ bool Sensor::isTripped(bool updateState) {
 }
 
 bool Sensor::isUntripped() {
-  this->read();
-  if (storedState == LOW && currentState == HIGH)
-  {
-    //this->count();
-    return true;
-  }
-  return false;
-}
-
-bool Sensor::isUntripped(bool updateState) {
-  if (updateState) {
-    this->read();
-  }
-  if (storedState == LOW && currentState == HIGH)
+  if (oldState == LOW && currentState == HIGH)
   {
     //this->count();
     return true;
