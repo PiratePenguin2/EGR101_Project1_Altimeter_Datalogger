@@ -36,14 +36,12 @@ void displayMenu(int id, bool clear=false, bool update=false) {
 
   switch(menuId) {
     case 0:
-      display.setCursor(10, 0);
       display.println("Current");
       display.setCursor(10, 16);
       display.println("Altitude");
       break;
     
     case 1:
-      display.setCursor(10, 0);
       display.println("Max");
       display.setCursor(10, 16);
       display.println("Altitude");
@@ -54,7 +52,7 @@ void displayMenu(int id, bool clear=false, bool update=false) {
       break;
 
     case 3:
-      display.println("Preferences");
+      display.println("Settings");
       break;
     
     default:
@@ -69,15 +67,38 @@ void displayMenu(int id, bool clear=false, bool update=false) {
 }
 
 void displayScreen(int id, bool clear=false, bool update=false) {
-  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextSize(1); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
+  display.setCursor(5, 0);
 
   if (clear) {
     display.clearDisplay();
   }
 
-  display.println("Active Page");
+  switch(menuId) {
+    case 0:
+      display.println("Current Altitude");
+      break;
+    
+    case 1:
+      display.println("Max Altitude");
+      display.setTextSize(3);
+      display.setCursor(80, 16);
+      display.println("000m");
+      break;
+    
+    case 2:
+      display.println("Status");
+      break;
+
+    case 3:
+      display.println("Settings");
+      break;
+    
+    default:
+      display.println("Undefined Menu");
+      break;
+  }
 
 
   if (update) {
