@@ -1,0 +1,165 @@
+/**
+* https://randomnerdtutorials.com/altimeter-datalogger-esp32-bmp388/
+*
+ */
+ 
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 32 // OLED display height, in pixels
+
+#define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+#define BUTTON_1_PIN 14
+#define BUTTON_2_PIN 12
+#define BUTTON_3_PIN 3
+#define BUTTON_4_PIN 4
+
+int menuId = 0;
+bool menuActive = true;
+
+void displayMenu(int id, bool clear=false, bool update=false) {
+  menuId = id;
+
+  if (clear) {
+    display.clearDisplay();
+  }
+
+  switch(menuId) {
+    case 0:
+      display.println("Menu 0");
+      break;
+    
+    case 1:
+      display.println("Menu 1");
+      break;
+    
+    case 2:
+      display.println("Menu 2");
+      break;
+
+    case 3:
+      display.println("Menu 3");
+      break;
+    
+    default:
+      display.println("Undefined Menu");
+      break;
+  }
+
+  if (update) {
+    display.display();
+  }
+
+}
+
+
+void setup() {
+  Serial.begin(9600);
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
+
+  display.display();
+  display.clearDisplay();
+
+  //testscrolltext();    // Draw scrolling text
+
+  pinMode(BUTTON_1_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_2_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_3_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_4_PIN, INPUT_PULLUP);
+
+
+}
+
+void loop() {
+
+  if (getButton1()) {
+    Serial.println("Button 1 Pressed");
+    if (menuActive) {
+      menuActive = false;
+      Serial.println("Waiting to release");
+      bool state = true;
+      while (state) {state=getButton1();}
+    } else {
+      menuActive = true;
+      while (getButton1()) {}
+      Serial.println("Button 1 Released");
+    }
+  }
+
+  if (menuActive) {
+    if (getButton2()) {
+      Serial.println("Button 2 Pressed");
+      if (menuId >= 3) {
+        menuId = 0;
+      } else {
+        menuId += 1;
+      }
+    } 
+    bool state = true;
+    while (state) {state = getButton2();}
+    Serial.println("Button 2 Released");
+    displayMenu(menuId, true, true);
+  } else {
+    //do something else, show static page
+  }
+
+
+
+  
+
+}
+
+
+void testscrolltext(void) {
+  display.clearDisplay();
+
+  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 0);
+  display.println(F("scroll"));
+  display.display();      // Show initial text
+  delay(100);
+
+  // Scroll in various directions, pausing in-between:
+  display.startscrollright(0x00, 0x0F);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+  display.startscrollleft(0x00, 0x0F);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+  display.startscrolldiagright(0x00, 0x07);
+  delay(2000);
+  display.startscrolldiagleft(0x00, 0x07);
+  delay(2000);
+  display.stopscroll();
+  delay(1000);
+}
+
+bool getButton1() {
+  bool state = digitalRead(BUTTON_1_PIN) == HIGH;
+  return state ? true : false;
+}
+bool getButton2() {
+  bool state = digitalRead(BUTTON_2_PIN) == HIGH;
+  return state ? true : false;
+}
+bool getButton3() {
+  bool state = digitalRead(BUTTON_3_PIN) == HIGH;
+  return state ? true : false;
+}
+bool getButton4() {
+  bool state = digitalRead(BUTTON_4_PIN) == HIGH;
+  return state ? true : false;
+}
