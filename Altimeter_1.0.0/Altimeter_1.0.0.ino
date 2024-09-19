@@ -25,8 +25,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 int menuId = 0;
 bool menuActive = true;
-bool liveCapture = false;
-bool manualCapture = true;
+bool liveCapture = true;
+bool manualCapture = false;
 bool showRecord = false;
 int count = 0;
 
