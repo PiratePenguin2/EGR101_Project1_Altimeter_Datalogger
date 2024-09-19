@@ -8,6 +8,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include "Timer.h"
+#include "Sensor.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -31,6 +32,8 @@ bool showRecord = false;
 int count = 0;
 
 Timer recordDot;
+
+Sensor btn1, btn2, btn3, btn4;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
@@ -206,35 +209,31 @@ void setup() {
   display.display();
   display.clearDisplay();
 
+  btn1.attach(BUTTON_1_PIN);
+  btn2.attach(BUTTON_2_PIN);
+  btn3.attach(BUTTON_3_PIN);
+  btn4.attach(BUTTON_4_PIN);
 
   //testscrolltext();    // Draw scrolling text
-
-  pinMode(BUTTON_1_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_2_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_3_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_4_PIN, INPUT_PULLUP);
-
 
 }
 
 void loop() {
+  btn1.update(); btn2.update(); btn3.update(); btn4.update();
 
-  if (getButton1()) {
+
+  if (btn1.isTripped()) {
     if (menuActive) {
       menuActive = false;
-      bool state = true;
-      while (state) {state=getButton1();}
       swipeRight();
     } else {
       menuActive = true;
-      bool state = true;
-      while (state) {state=getButton1();}
       swipeLeft();
     }
   }
 
   if (menuActive) {
-    if (getButton2()) {
+    if (btn2.isTripped()) {
       if (menuId >= 3) {
         menuId = 0;
         swipeDown();
@@ -242,8 +241,6 @@ void loop() {
         menuId += 1;
         swipeDown();
       }
-      bool state = true;
-      while (state) {state = getButton2();}
     }
     displayMenu(menuId, true, true);
 
@@ -259,12 +256,7 @@ void loop() {
     display.display();
   }
 
-  if (recordDot.isFinished()) {
-    showRecord = !showRecord;
-    recordDot.setTimer(REC_BLINK_DELAY);
-  }
-
-
+  checkRecordDot();
 }
 
 
@@ -295,19 +287,9 @@ void testscrolltext(void) {
   delay(1000);
 }
 
-bool getButton1() {
-  bool state = digitalRead(BUTTON_1_PIN) == LOW;
-  return state ? true : false;
-}
-bool getButton2() {
-  bool state = digitalRead(BUTTON_2_PIN) == LOW;
-  return state ? true : false;
-}
-bool getButton3() {
-  bool state = digitalRead(BUTTON_3_PIN) == LOW;
-  return state ? true : false;
-}
-bool getButton4() {
-  bool state = digitalRead(BUTTON_4_PIN) == LOW;
-  return state ? true : false;
+void checkRecordDot() {
+  if (recordDot.isFinished()) {
+    showRecord = !showRecord;
+    recordDot.setTimer(REC_BLINK_DELAY);
+  }
 }
