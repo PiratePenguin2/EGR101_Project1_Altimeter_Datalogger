@@ -7,7 +7,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include "Sensor.h"
+#include "Timer.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -21,10 +21,16 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define BUTTON_3_PIN 3
 #define BUTTON_4_PIN 4
 
+#define REC_BLINK_DELAY 650
+
 int menuId = 0;
 bool menuActive = true;
+bool liveCapture = false;
+bool manualCapture = true;
+bool showRecord = false;
+int count = 0;
 
-Sensor btn1;
+Timer recordDot;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
@@ -39,14 +45,12 @@ void displayMenu(int id, bool clear=false, bool update=false) {
 
   switch(menuId) {
     case 0:
-      display.setCursor(10, 0);
       display.println("Current");
       display.setCursor(10, 16);
       display.println("Altitude");
       break;
     
     case 1:
-      display.setCursor(10, 0);
       display.println("Max");
       display.setCursor(10, 16);
       display.println("Altitude");
@@ -57,7 +61,7 @@ void displayMenu(int id, bool clear=false, bool update=false) {
       break;
 
     case 3:
-      display.println("Preferences");
+      display.println("Settings");
       break;
     
     default:
@@ -72,21 +76,122 @@ void displayMenu(int id, bool clear=false, bool update=false) {
 }
 
 void displayScreen(int id, bool clear=false, bool update=false) {
-  display.setTextSize(2); // Draw 2X-scale text
+  display.setTextSize(1); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
+  display.setCursor(0, 0);
 
   if (clear) {
     display.clearDisplay();
   }
 
-  display.println("Active Page");
+  switch(menuId) {
+    case 0:
+      display.println("Current Altitude");
+      display.setTextSize(2);
+      display.setCursor(70, 11);
+      display.println("000m");
+      display.setTextSize(1.5);
+      display.setCursor(10, 20);
+      break;
+    
+    case 1:
+      display.println("Max Altitude");
+      display.setTextSize(2);
+      display.setCursor(70, 11);
+      display.println("000m");
+      display.setTextSize(1.5);
+      display.setCursor(10, 20);
+      break;
+    
+    case 2:
+      display.println("Status");
+      break;
+
+    case 3:
+      display.println("Settings");
+      break;
+    
+    default:
+      display.println("Undefined Menu");
+      break;
+  }
 
 
   if (update) {
     display.display();
   }
 
+}
+
+void swipeDown() {
+  int swipeSpeed = 7; // Speed of swipe, increase to make it faster
+
+  for (int y = 0; y <= SCREEN_HEIGHT+10; y += swipeSpeed) {
+    
+    // Draw a black rectangle swiping from top to bottom
+    display.fillRect(0, SCREEN_HEIGHT - y, SCREEN_WIDTH, y, SSD1306_BLACK);
+    
+    // Update the display
+    display.display();
+    
+    delay(40); // Adjust delay for smoother animation
+  }
+
+  // Make sure the screen is completely cleared
+  display.clearDisplay();
+  display.display();
+}
+
+void swipeRight() {
+  int swipeSpeed = 14; // Speed of swipe, increase to make it faster
+
+  for (int x = 0; x <= SCREEN_WIDTH; x += swipeSpeed) {
+    
+    // Draw a black rectangle swiping from right to left
+    display.fillRect(SCREEN_WIDTH - x, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SSD1306_BLACK);
+    
+    // Update the display
+    display.display();
+    
+    delay(30); // Adjust delay for smoother animation
+  }
+
+  // Make sure the screen is completely cleared
+  display.clearDisplay();
+  display.display();
+}
+
+void swipeLeft() {
+  int swipeSpeed = 14; // Speed of swipe, increase to make it faster
+
+  for (int x = 0; x <= SCREEN_WIDTH; x += swipeSpeed) {
+    
+    // Draw a black rectangle swiping from right to left
+    display.fillRect(0, 0, x, SCREEN_HEIGHT, SSD1306_BLACK);
+
+    
+    // Update the display
+    display.display();
+    
+    delay(30); // Adjust delay for smoother animation
+  }
+
+  // Make sure the screen is completely cleared
+  display.clearDisplay();
+  display.display();
+}
+
+void showRecordingState(bool show) {
+  if (show) {
+    display.setCursor(7, 20);
+    if (liveCapture) {
+      display.fillCircle(2, 23, 2, SSD1306_WHITE);
+      display.println("REC");
+    } else if (manualCapture) {
+      display.fillCircle(2, 23, 2, SSD1306_WHITE);
+      display.println("WAIT CAPT");
+    }
+  }
 }
 
 
@@ -101,37 +206,30 @@ void setup() {
   display.display();
   display.clearDisplay();
 
+
   //testscrolltext();    // Draw scrolling text
 
-  btn1.attach(BUTTON_1_PIN);
+  pinMode(BUTTON_1_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_2_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_3_PIN, INPUT_PULLUP);
+  pinMode(BUTTON_4_PIN, INPUT_PULLUP);
 
 
 }
 
 void loop() {
-  btn1.update();
 
-  Serial.println(btn1.read());
-
-  if (btn1.isTripped()) {
-    Serial.println("Button 1 is pressed");
-  }
-  if (btn1.isUntripped()) {
-    Serial.println("Button 1 is not pressed");
-  }
-  
-  delay(100);
-
-  /*if (getButton1()) {
+  if (getButton1()) {
     if (menuActive) {
       menuActive = false;
       bool state = true;
       while (state) {state=getButton1();}
+      swipeRight();
     } else {
       menuActive = true;
       bool state = true;
       while (state) {state=getButton1();}
-      Serial.println("Button 1 Released");
+      swipeLeft();
     }
   }
 
@@ -139,17 +237,33 @@ void loop() {
     if (getButton2()) {
       if (menuId >= 3) {
         menuId = 0;
+        swipeDown();
       } else {
         menuId += 1;
+        swipeDown();
       }
       bool state = true;
       while (state) {state = getButton2();}
     }
     displayMenu(menuId, true, true);
+
+
+
   } else {
-    displayScreen(menuId, true, true);
+    displayScreen(menuId, true, false);
     //do something else, show static page
-  }*/
+
+    // display the recording symbol
+    showRecordingState(showRecord);
+
+    display.display();
+  }
+
+  if (recordDot.isFinished()) {
+    showRecord = !showRecord;
+    recordDot.setTimer(REC_BLINK_DELAY);
+  }
+
 
 }
 

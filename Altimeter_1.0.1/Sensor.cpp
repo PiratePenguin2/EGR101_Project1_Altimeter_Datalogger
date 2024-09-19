@@ -20,7 +20,6 @@ bool Sensor::read() {
 bool Sensor::isTripped() {
   if (oldState == HIGH && currentState == LOW)
   {
-    //this->count();
     return true;
   }
   return false;
@@ -29,7 +28,6 @@ bool Sensor::isTripped() {
 bool Sensor::isUntripped() {
   if (oldState == LOW && currentState == HIGH)
   {
-    //this->count();
     return true;
   }
   return false;
