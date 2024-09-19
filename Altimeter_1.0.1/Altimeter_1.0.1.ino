@@ -24,12 +24,31 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define REC_BLINK_DELAY 650
 
-int menuId = 0;
+enum Screens {
+  SCREEN_0,
+  SCREEN_1,
+  SCREEN_2,
+  SCREEN_3
+};
+//const int NUM_SCREENS = 4;
+
+enum Menus {
+  MENU_0,
+  MENU_1,
+  MENU_2,
+  MENU_3
+};
+const int NUM_MENUS = 4;
+
 bool menuActive = true;
 bool liveCapture = false;
 bool manualCapture = true;
 bool showRecord = false;
-int count = 0;
+//int count = 0;
+
+
+Screens screenId = SCREEN_0;
+Menus menuId = MENU_0;
 
 Timer recordDot;
 
@@ -47,13 +66,13 @@ void displayMenu(int id, bool clear=false, bool update=false) {
   }
 
   switch(menuId) {
-    case 0:
+    case SCREEN_0:
       display.println("Current");
       display.setCursor(10, 16);
       display.println("Altitude");
       break;
     
-    case 1:
+    case SCREEN_1:
       display.println("Max");
       display.setCursor(10, 16);
       display.println("Altitude");
@@ -88,7 +107,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
   }
 
   switch(menuId) {
-    case 0:
+    case SCREEN_0:
       display.println("Current Altitude");
       display.setTextSize(2);
       display.setCursor(70, 11);
@@ -97,7 +116,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.setCursor(10, 20);
       break;
     
-    case 1:
+    case SCREEN_1:
       display.println("Max Altitude");
       display.setTextSize(2);
       display.setCursor(70, 11);
@@ -106,16 +125,17 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.setCursor(10, 20);
       break;
     
-    case 2:
+    case SCREEN_2:
       display.println("Status");
       break;
 
-    case 3:
+    case SCREEN_3:
       display.println("Settings");
       break;
     
     default:
       display.println("Undefined Menu");
+      for(;;);
       break;
   }
 
@@ -220,11 +240,13 @@ void setup() {
 
 void loop() {
   btn1.update(); btn2.update(); btn3.update(); btn4.update();
+  checkRecordDot();
+  
 
-
-  if (btn1.isTripped()) {
+  if (btn1.isTripped()) { // Toggles between the display screen and the menu
     if (menuActive) {
       menuActive = false;
+      screenId = menuId;
       swipeRight();
     } else {
       menuActive = true;
@@ -232,22 +254,20 @@ void loop() {
     }
   }
 
-  if (menuActive) {
+  if (menuActive) {       // Cycles through the different menu options
     if (btn2.isTripped()) {
-      if (menuId >= 3) {
-        menuId = 0;
+      if (menuId < NUM_MENUS) {
+        menuId += 1;
         swipeDown();
       } else {
-        menuId += 1;
+        menuId = 0;
         swipeDown();
       }
     }
     displayMenu(menuId, true, true);
-
-
-
-  } else {
-    displayScreen(menuId, true, false);
+  }
+  else {
+    displayScreen(screenId, true, false);
     //do something else, show static page
 
     // display the recording symbol
@@ -255,8 +275,6 @@ void loop() {
 
     display.display();
   }
-
-  checkRecordDot();
 }
 
 
