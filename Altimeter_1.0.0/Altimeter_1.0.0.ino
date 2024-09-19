@@ -24,6 +24,7 @@ int menuId = 0;
 bool menuActive = true;
 bool liveCapture = true;
 bool manualCapture = false;
+bool showRecord = false;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
@@ -85,10 +86,6 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.println("000m");
       display.setTextSize(1.5);
       display.setCursor(10, 20);
-      if (liveCapture) {
-        display.fillCircle(5, 23, 2, SSD1306_WHITE);
-        display.println("REC");
-      }
       break;
     
     case 1:
@@ -98,10 +95,6 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.println("000m");
       display.setTextSize(1.5);
       display.setCursor(10, 20);
-      if (liveCapture) {
-        display.fillCircle(5, 23, 2, SSD1306_WHITE);
-        display.println("REC");
-      }
       break;
     
     case 2:
@@ -182,8 +175,17 @@ void swipeLeft() {
   display.display();
 }
 
-void showTimers() {
-  // pass
+void showRecordingState(bool show) {
+  if (show) {}
+    display.setCursor(0, 20);
+    if (liveCapture) {
+      display.fillCircle(5, 20, 2, SSD1306_WHITE);
+      display.println("REC");
+    } else if (manualCapture) {
+      display.fillCircle(5, 20, 2, SSD1306_WHITE);
+      display.println("WAIT CAPT");
+    }
+  }
 }
 
 
@@ -238,9 +240,15 @@ void loop() {
       while (state) {state = getButton2();}
     }
     displayMenu(menuId, true, true);
+
+
+
   } else {
     displayScreen(menuId, true, true);
     //do something else, show static page
+
+    // display the recording symbol
+    showRecordingState(showRecord);
   }
 
 }
