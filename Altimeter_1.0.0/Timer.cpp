@@ -3,6 +3,7 @@
 #include "Timer.h"
 
 Timer::Timer() {
+  setTimer(0);
 }
 
 Timer::Timer(int mSec) {
