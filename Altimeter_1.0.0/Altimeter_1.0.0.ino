@@ -7,6 +7,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "Timer.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -25,8 +26,9 @@ bool menuActive = true;
 bool liveCapture = true;
 bool manualCapture = false;
 bool showRecord = false;
+int count = 0;
 
-Timer recordDot = new Timer();
+Timer recordDot;
 
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
@@ -178,7 +180,7 @@ void swipeLeft() {
 }
 
 void showRecordingState(bool show) {
-  if (show) {}
+  if (show) {
     display.setCursor(0, 20);
     if (liveCapture) {
       display.fillCircle(5, 20, 2, SSD1306_WHITE);
@@ -246,12 +248,20 @@ void loop() {
 
 
   } else {
-    displayScreen(menuId, true, true);
+    displayScreen(menuId, true, false);
     //do something else, show static page
 
     // display the recording symbol
     showRecordingState(showRecord);
+
+    display.display();
   }
+
+  if (recordDot.isFinished()) {
+    showRecord = !showRecord;
+    recordDot.setTimer(650);
+  }
+
 
 }
 
