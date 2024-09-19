@@ -23,8 +23,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 int menuId = 0;
 bool menuActive = true;
-bool liveCapture = true;
-bool manualCapture = false;
+bool liveCapture = false;
+bool manualCapture = true;
 bool showRecord = false;
 int count = 0;
 
@@ -181,12 +181,12 @@ void swipeLeft() {
 
 void showRecordingState(bool show) {
   if (show) {
-    display.setCursor(0, 20);
+    display.setCursor(7, 20);
     if (liveCapture) {
-      display.fillCircle(5, 20, 2, SSD1306_WHITE);
+      display.fillCircle(2, 23, 2, SSD1306_WHITE);
       display.println("REC");
     } else if (manualCapture) {
-      display.fillCircle(5, 20, 2, SSD1306_WHITE);
+      display.fillCircle(2, 23, 2, SSD1306_WHITE);
       display.println("WAIT CAPT");
     }
   }
