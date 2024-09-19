@@ -25,6 +25,8 @@ bool menuActive = true;
 bool liveCapture = true;
 bool manualCapture = false;
 
+Timer recordDot = new Timer();
+
 void displayMenu(int id, bool clear=false, bool update=false) {
   menuId = id;
 
