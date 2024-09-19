@@ -113,7 +113,7 @@ void loop() {
 
   Serial.println(btn1.read());
 
-  /*if (btn1.isTripped()) {
+  if (btn1.isTripped()) {
     Serial.println("Button 1 is pressed");
   }
   if (btn1.isUntripped()) {

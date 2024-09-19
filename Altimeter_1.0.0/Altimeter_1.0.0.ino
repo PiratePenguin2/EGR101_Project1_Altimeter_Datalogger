@@ -182,6 +182,10 @@ void swipeLeft() {
   display.display();
 }
 
+void showTimers() {
+  // pass
+}
+
 
 void setup() {
   Serial.begin(9600);
