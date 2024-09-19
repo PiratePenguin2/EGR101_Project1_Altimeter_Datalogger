@@ -21,6 +21,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define BUTTON_3_PIN 3
 #define BUTTON_4_PIN 4
 
+#define REC_BLINK_DELAY 650
+
 int menuId = 0;
 bool menuActive = true;
 bool liveCapture = true;
@@ -259,7 +261,7 @@ void loop() {
 
   if (recordDot.isFinished()) {
     showRecord = !showRecord;
-    recordDot.setTimer(650);
+    recordDot.setTimer(REC_BLINK_DELAY);
   }
 
 
