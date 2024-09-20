@@ -270,13 +270,16 @@ void loop() {
   }
 
   if (btn4.isTripped()) {
-    if (liveCapture) {
-      if (captureActive) {
+    if (liveCapture) {  // If recording in live capture mode
+      if (captureActive) {  // If displaying recording symbol
         captureActive = false;
-      } else {
+      }
+      else {
+        recordDot.setTimer(REC_BLINK_DELAY);
         captureActive = true;
       }
-    } else if (manualCapture) {
+    }
+    else if (manualCapture) {
       // capture an altitude
     }
   }
