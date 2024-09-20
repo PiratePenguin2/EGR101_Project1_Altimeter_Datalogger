@@ -2,7 +2,7 @@
 * https://randomnerdtutorials.com/altimeter-datalogger-esp32-bmp388/
 *
  */
- 
+
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
@@ -47,6 +47,7 @@ bool showRecord = false;
 bool captureActive = false;
 //int count = 0;
 
+Adafruit_BMP3XX bmp;
 
 Menus menuId = MENU_0;
 
@@ -245,6 +246,16 @@ void setup() {
   delay(100);
   digitalWrite(SPEAKER_PIN, LOW);
 
+  if (!bmp.begin_I2C()) {
+    Serial.println("Could not find a valid BMP388 sensor, check wiring!");
+    while (1);
+  }
+
+  // Set up oversampling and filter initialization
+  bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
+  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
+  bmp.setOutputDataRate(BMP3_ODR_50_HZ);
   //testscrolltext();    // Draw scrolling text
 
 }
@@ -357,8 +368,24 @@ void loop() {
     }
   }
 
-  Serial.println(liveCapture);
 
+  if (! bmp.performReading()) {
+  Serial.println("Failed to perform reading :(");
+  return;
+  }
+  Serial.print("Temperature = ");
+  Serial.print(bmp.temperature);
+  Serial.println(" *C");
+
+  Serial.print("Pressure = ");
+  Serial.print(bmp.pressure / 100.0);
+  Serial.println(" hPa");
+
+  Serial.print("Approx. Altitude = ");
+  Serial.print(static_cast<int>((bmp.readAltitude(SEALEVELPRESSURE_HPA) * 3.28084) + .5));
+  Serial.println(" ft");
+
+  Serial.println();
 }
 
 void testscrolltext(void) {
