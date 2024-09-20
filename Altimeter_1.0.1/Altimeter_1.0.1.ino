@@ -37,7 +37,7 @@ const int NUM_MENUS = 4;
 
 bool menuActive = true;
 bool liveCapture = false;
-bool manualCapture = true;
+bool manualCapture = false;
 bool showRecord = false;
 bool captureActive = false;
 //int count = 0;
@@ -280,7 +280,42 @@ void loop() {
     display.display();
   }
 
-  if (btn4.isTripped()) {
+  if (btn3.isTripped() && !menuActive) {
+    if (!captureActive) {
+
+      if (manualCapture) {
+        manualCapture = false;
+        liveCapture = true;
+        digitalWrite(SPEAKER_PIN, HIGH);
+        display.clearDisplay();
+        display.setCursor(15, 12);
+        display.setTextSize(2);
+        display.println("REC MODE");
+        display.display();
+        delay(250);
+        display.clearDisplay();
+        digitalWrite(SPEAKER_PIN, LOW);
+      } else if (liveCapture) {
+        liveCapture = false;
+        manualCapture = true;
+        digitalWrite(SPEAKER_PIN, HIGH);
+        display.clearDisplay();
+        display.setCursor(15, 12);
+        display.setTextSize(2);
+        display.println("CAPT MODE");
+        display.display();
+        delay(250);
+        display.clearDisplay();
+        digitalWrite(SPEAKER_PIN, LOW);
+      } else {
+        liveCapture = true;
+        manualCapture = false;
+      }
+    }
+  }
+
+
+  if (btn4.isTripped() && !menuActive) {
     if (liveCapture) {  // If recording in live capture mode
       if (captureActive) {  // If displaying recording symbol
         captureActive = false;
@@ -314,6 +349,8 @@ void loop() {
       // capture an altitude
     }
   }
+
+  Serial.println(liveCapture);
 
 }
 
