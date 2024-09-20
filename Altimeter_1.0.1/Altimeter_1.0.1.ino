@@ -88,6 +88,7 @@ void displayMenu(int id, bool clear=false, bool update=false) {
     
     default:
       display.println("Undefined Menu");
+      for(;;);
       break;
   }
 
@@ -241,7 +242,7 @@ void setup() {
 void loop() {
   btn1.update(); btn2.update(); btn3.update(); btn4.update();
   checkRecordDot();
-  
+
 
   if (btn1.isTripped()) { // Toggles between the display screen and the menu
     if (menuActive) {
