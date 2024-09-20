@@ -19,17 +19,11 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define BUTTON_1_PIN 14
 #define BUTTON_2_PIN 12
-#define BUTTON_3_PIN 3
-#define BUTTON_4_PIN 4
+#define BUTTON_3_PIN 13
+#define BUTTON_4_PIN 26
 
 #define REC_BLINK_DELAY 650
 
-enum Screens {
-  SCREEN_0,
-  SCREEN_1,
-  SCREEN_2,
-  SCREEN_3
-};
 //const int NUM_SCREENS = 4;
 
 enum Menus {
@@ -44,17 +38,17 @@ bool menuActive = true;
 bool liveCapture = false;
 bool manualCapture = true;
 bool showRecord = false;
+bool captureActive = false;
 //int count = 0;
 
 
-Screens screenId = SCREEN_0;
 Menus menuId = MENU_0;
 
 Timer recordDot;
 
 Sensor btn1, btn2, btn3, btn4;
 
-void displayMenu(int id, bool clear=false, bool update=false) {
+void displayMenu(Menus id, bool clear=false, bool update=false) {
   menuId = id;
 
   display.setTextSize(2); // Draw 2X-scale text
@@ -66,23 +60,23 @@ void displayMenu(int id, bool clear=false, bool update=false) {
   }
 
   switch(menuId) {
-    case SCREEN_0:
+    case MENU_0:
       display.println("Current");
       display.setCursor(10, 16);
       display.println("Altitude");
       break;
     
-    case SCREEN_1:
+    case MENU_1:
       display.println("Max");
       display.setCursor(10, 16);
       display.println("Altitude");
       break;
     
-    case 2:
+    case MENU_2:
       display.println("Status");
       break;
 
-    case 3:
+    case MENU_3:
       display.println("Settings");
       break;
     
@@ -108,29 +102,29 @@ void displayScreen(int id, bool clear=false, bool update=false) {
   }
 
   switch(menuId) {
-    case SCREEN_0:
+    case MENU_0:
       display.println("Current Altitude");
       display.setTextSize(2);
-      display.setCursor(70, 11);
-      display.println("000m");
+      display.setCursor(67, 13);
+      display.println("0000m");
       display.setTextSize(1.5);
       display.setCursor(10, 20);
       break;
     
-    case SCREEN_1:
+    case MENU_1:
       display.println("Max Altitude");
       display.setTextSize(2);
-      display.setCursor(70, 11);
-      display.println("000m");
+      display.setCursor(67, 13);
+      display.println("0000m");
       display.setTextSize(1.5);
       display.setCursor(10, 20);
       break;
     
-    case SCREEN_2:
+    case MENU_2:
       display.println("Status");
       break;
 
-    case SCREEN_3:
+    case MENU_3:
       display.println("Settings");
       break;
     
@@ -208,10 +202,10 @@ void swipeLeft() {
 void showRecordingState(bool show) {
   if (show) {
     display.setCursor(7, 20);
-    if (liveCapture) {
+    if (liveCapture && captureActive) {
       display.fillCircle(2, 23, 2, SSD1306_WHITE);
       display.println("REC");
-    } else if (manualCapture) {
+    } else if (manualCapture && captureActive) {
       display.fillCircle(2, 23, 2, SSD1306_WHITE);
       display.println("WAIT CAPT");
     }
@@ -247,7 +241,6 @@ void loop() {
   if (btn1.isTripped()) { // Toggles between the display screen and the menu
     if (menuActive) {
       menuActive = false;
-      screenId = menuId;
       swipeRight();
     } else {
       menuActive = true;
@@ -257,18 +250,17 @@ void loop() {
 
   if (menuActive) {       // Cycles through the different menu options
     if (btn2.isTripped()) {
-      if (menuId < NUM_MENUS) {
-        menuId += 1;
+      if (menuId < NUM_MENUS - 1) {
+        menuId = static_cast<Menus>(static_cast<int>(menuId) + 1);
         swipeDown();
       } else {
-        menuId = 0;
+        menuId = MENU_0;
         swipeDown();
       }
     }
     displayMenu(menuId, true, true);
-  }
-  else {
-    displayScreen(screenId, true, false);
+  } else {
+    displayScreen(menuId, true, false);
     //do something else, show static page
 
     // display the recording symbol
@@ -276,6 +268,19 @@ void loop() {
 
     display.display();
   }
+
+  if (btn4.isTripped()) {
+    if (liveCapture) {
+      if (captureActive) {
+        captureActive = false;
+      } else {
+        captureActive = true;
+      }
+    } else if (manualCapture) {
+      // capture an altitude
+    }
+  }
+
 }
 
 

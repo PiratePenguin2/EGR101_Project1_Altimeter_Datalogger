@@ -19,8 +19,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define BUTTON_1_PIN 14
 #define BUTTON_2_PIN 12
-#define BUTTON_3_PIN 3
-#define BUTTON_4_PIN 4
+#define BUTTON_3_PIN 13
+#define BUTTON_4_PIN 26
 
 #define REC_BLINK_DELAY 650
 
@@ -91,8 +91,8 @@ void displayScreen(int id, bool clear=false, bool update=false) {
     case 0:
       display.println("Current Altitude");
       display.setTextSize(2);
-      display.setCursor(70, 11);
-      display.println("000m");
+      display.setCursor(67, 13);
+      display.println("0000m");
       display.setTextSize(1.5);
       display.setCursor(10, 20);
       break;
@@ -100,8 +100,8 @@ void displayScreen(int id, bool clear=false, bool update=false) {
     case 1:
       display.println("Max Altitude");
       display.setTextSize(2);
-      display.setCursor(70, 11);
-      display.println("000m");
+      display.setCursor(67, 13);
+      display.println("0000m");
       display.setTextSize(1.5);
       display.setCursor(10, 20);
       break;
