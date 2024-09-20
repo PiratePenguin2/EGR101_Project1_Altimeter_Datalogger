@@ -301,6 +301,7 @@ void loop() {
       display.setTextSize(2);
       display.println("CAPTURED");
       display.display();
+
       digitalWrite(SPEAKER_PIN, HIGH);
       delay(100);
       digitalWrite(SPEAKER_PIN, LOW);
@@ -308,6 +309,7 @@ void loop() {
       digitalWrite(SPEAKER_PIN, HIGH);
       delay(100);
       digitalWrite(SPEAKER_PIN, LOW);
+
       delay(500);
       display.clearDisplay();
 
@@ -316,7 +318,6 @@ void loop() {
   }
 
 }
-
 
 void testscrolltext(void) {
   display.clearDisplay();
