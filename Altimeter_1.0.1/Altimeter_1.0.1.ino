@@ -21,6 +21,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define BUTTON_2_PIN 12
 #define BUTTON_3_PIN 13
 #define BUTTON_4_PIN 26
+#define SPEAKER_PIN 15
 
 #define REC_BLINK_DELAY 650
 
@@ -229,6 +230,16 @@ void setup() {
   btn3.attach(BUTTON_3_PIN);
   btn4.attach(BUTTON_4_PIN);
 
+  pinMode(SPEAKER_PIN, OUTPUT);
+  
+  digitalWrite(SPEAKER_PIN, HIGH);
+  delay(100);
+  digitalWrite(SPEAKER_PIN, LOW);
+  delay(100);
+  digitalWrite(SPEAKER_PIN, HIGH);
+  delay(100);
+  digitalWrite(SPEAKER_PIN, LOW);
+
   //testscrolltext();    // Draw scrolling text
 
 }
@@ -277,6 +288,26 @@ void loop() {
         captureActive = true;
       }
     } else if (manualCapture) {
+      if (captureActive) {
+        // idk man
+      } else {
+        captureActive = true;
+      }
+
+      display.clearDisplay();
+      display.setCursor(15, 12);
+      display.setTextSize(2);
+      display.println("CAPTURED");
+      display.display();
+      digitalWrite(SPEAKER_PIN, HIGH);
+      delay(100);
+      digitalWrite(SPEAKER_PIN, LOW);
+      delay(100);
+      digitalWrite(SPEAKER_PIN, HIGH);
+      delay(100);
+      digitalWrite(SPEAKER_PIN, LOW);
+      delay(500);
+      display.clearDisplay();
       // capture an altitude
     }
   }
