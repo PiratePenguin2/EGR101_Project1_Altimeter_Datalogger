@@ -53,13 +53,13 @@ void loop() {
     Serial.println("Failed to perform reading :(");
     return;
   }
-  /*Serial.print("Temperature = ");
+  Serial.print("Temperature = ");
   Serial.print(bmp.temperature);
   Serial.println(" *C");
 
   Serial.print("Pressure = ");
   Serial.print(bmp.pressure / 100.0);
-  Serial.println(" hPa");*/
+  Serial.println(" hPa");
 
   Serial.print("Approx. Altitude = ");
   Serial.print(static_cast<int>((bmp.readAltitude(SEALEVELPRESSURE_HPA) * 3.28084) + .5));
