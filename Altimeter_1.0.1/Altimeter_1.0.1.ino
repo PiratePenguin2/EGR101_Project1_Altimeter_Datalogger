@@ -386,6 +386,8 @@ void loop() {
   Serial.println(" ft");
 
   Serial.println();
+  
+  delay(10);
 }
 
 void testscrolltext(void) {
