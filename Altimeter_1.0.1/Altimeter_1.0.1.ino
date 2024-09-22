@@ -30,8 +30,6 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define REC_BLINK_DELAY 650
 
-//const int NUM_SCREENS = 4;
-
 enum Menus {
   MENU_0,
   MENU_1,
@@ -45,6 +43,10 @@ bool liveCapture = false;
 bool manualCapture = false;
 bool showRecord = false;
 bool captureActive = false;
+
+bool useMeters = false;
+double currentAltitude = 0;
+double maxAltitude = 0;
 //int count = 0;
 
 Adafruit_BMP3XX bmp;
@@ -113,7 +115,15 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.println("Current Altitude");
       display.setTextSize(2);
       display.setCursor(67, 13);
-      display.println("0000m");
+      if (!useMeters) {
+        display.print(static_cast<int>(currentAltitude * 3.28084));
+        display.setTextSize(1);
+        display.setCursor(103, 20);
+        display.println("ft");
+      } else {
+        display.print(currentAltitude);
+        display.println("m");
+      }
       display.setTextSize(1.5);
       display.setCursor(10, 20);
       break;
@@ -122,7 +132,15 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.println("Max Altitude");
       display.setTextSize(2);
       display.setCursor(67, 13);
-      display.println("0000m");
+      if (!useMeters) {
+        display.print(static_cast<int>(maxAltitude * 3.28084));
+        display.setTextSize(1);
+        display.setCursor(103, 20);
+        display.println("ft");
+      } else {
+        display.print(maxAltitude);
+        display.println("m");
+      }
       display.setTextSize(1.5);
       display.setCursor(10, 20);
       break;
@@ -263,6 +281,12 @@ void setup() {
 void loop() {
   btn1.update(); btn2.update(); btn3.update(); btn4.update();
   checkRecordDot();
+
+  currentAltitude = static_cast<int>((bmp.readAltitude(SEALEVELPRESSURE_HPA)) + .5);
+
+  if (currentAltitude > maxAltitude && currentAltitude < maxAltitude + 300) {
+    maxAltitude = currentAltitude;
+  }
 
 
   if (btn1.isTripped()) { // Toggles between the display screen and the menu
