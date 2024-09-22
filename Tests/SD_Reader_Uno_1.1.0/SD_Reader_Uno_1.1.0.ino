@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-const int chipSelect = 4;  // Change to your SD card's CS pin
+const int chipSelect = 10;  // Set to your SD card module's CS pin
 
 void setup() {
   // Initialize serial communication for debugging
@@ -12,18 +12,11 @@ void setup() {
     Serial.println("Card Mount Failed");
     return;
   }
-
-  // Check SD card type
-  uint8_t cardType = SD.cardType();
-  if (cardType == CARD_NONE) {
-    Serial.println("No SD card attached");
-    return;
-  }
   
   Serial.println("SD card initialized.");
 
-  // Create folder and files
-  createRecording("Recording_1");
+  // Try to create folder and files
+  createRecording("REC_002");
 }
 
 void loop() {
@@ -32,9 +25,12 @@ void loop() {
 
 // Function to create a folder and save files
 void createRecording(String folderName) {
-  // Create directory
+  // Debugging message before trying to create the directory
+  Serial.println("Attempting to create directory: " + folderName);
+
+  // Create directory (simpler name, no special characters or spaces)
   if (!SD.mkdir(folderName.c_str())) {
-    Serial.println("Failed to create directory");
+    Serial.println("Failed to create directory: " + folderName);
     return;
   } else {
     Serial.println("Directory created: " + folderName);
@@ -50,7 +46,7 @@ void createRecording(String folderName) {
     csvFile.close();
     Serial.println("CSV file created and data written.");
   } else {
-    Serial.println("Failed to open CSV file");
+    Serial.println("Failed to open CSV file: " + csvFileName);
   }
 
   // Create and write to TXT file
@@ -63,6 +59,6 @@ void createRecording(String folderName) {
     txtFile.close();
     Serial.println("Text file created and metadata written.");
   } else {
-    Serial.println("Failed to open text file");
+    Serial.println("Failed to open text file: " + txtFileName);
   }
 }
