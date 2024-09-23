@@ -29,6 +29,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define SPEAKER_PIN 15
 
 #define REC_BLINK_DELAY 650
+#define REC_LIVE_INTERVAL 500
 
 enum Menus {
   MENU_0,
@@ -39,7 +40,7 @@ enum Menus {
 const int NUM_MENUS = 4;
 
 bool menuActive = true;
-bool liveCapture = false;
+bool liveCapture = true;
 bool manualCapture = false;
 bool showRecord = false;
 bool captureActive = false;
@@ -53,7 +54,7 @@ Adafruit_BMP3XX bmp;
 
 Menus menuId = MENU_0;
 
-Timer recordDot;
+Timer recordDot, recordTimer;
 
 Sensor btn1, btn2, btn3, btn4;
 
@@ -82,11 +83,17 @@ void displayMenu(Menus id, bool clear=false, bool update=false) {
       break;
     
     case MENU_2:
-      display.println("Status");
+      display.println("Storage");
       break;
 
     case MENU_3:
-      display.println("Settings");
+      display.println("Switch to");
+      display.setCursor(10, 16);
+      if (useMeters) {
+        display.println("Feet");
+      } else {
+        display.println("Meters");
+      }
       break;
     
     default:
@@ -109,8 +116,16 @@ void displayScreen(int id, bool clear=false, bool update=false) {
   if (clear) {
     display.clearDisplay();
   }
-
+  display.setTextSize(1);
+  display.setCursor(120, 0);
+  if (manualCapture) {
+    display.println("C");
+  } else if (liveCapture) {
+    display.println("R");
+  }
+  display.setCursor(0, 0);
   switch(menuId) {
+    
     case MENU_0:
       display.println("Current Altitude");
       display.setTextSize(2);
@@ -121,7 +136,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
         display.setCursor(103, 20);
         display.println("ft");
       } else {
-        display.print(currentAltitude);
+        display.print(static_cast<int>(currentAltitude));
         display.println("m");
       }
       display.setTextSize(1.5);
@@ -138,7 +153,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
         display.setCursor(103, 20);
         display.println("ft");
       } else {
-        display.print(maxAltitude);
+        display.print(static_cast<int>(maxAltitude));
         display.println("m");
       }
       display.setTextSize(1.5);
@@ -146,11 +161,21 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       break;
     
     case MENU_2:
-      display.println("Status");
+      display.println("Storage");
+      display.setCursor(0, 10);
+      display.println("9 / 20 Records Used");
       break;
 
     case MENU_3:
-      display.println("Settings");
+      if (useMeters) {
+        useMeters = false;
+      } else {
+        useMeters = true;
+      }
+      menuActive = true;
+      digitalWrite(SPEAKER_PIN, HIGH);
+      delay(100);
+      digitalWrite(SPEAKER_PIN, LOW);
       break;
     
     default:
@@ -351,6 +376,39 @@ void loop() {
         liveCapture = true;
         manualCapture = false;
       }
+    } else {
+      if (manualCapture) {
+        captureActive = false;
+        display.clearDisplay();
+        display.setCursor(5, 12);
+        display.setTextSize(2);
+        display.println("REC STOP");
+        display.display();
+
+        digitalWrite(SPEAKER_PIN, HIGH);
+        delay(100);
+        delay(100);
+        digitalWrite(SPEAKER_PIN, LOW);
+
+        delay(500);
+        display.clearDisplay();
+
+      } else if (liveCapture) {
+        captureActive = false;
+        display.clearDisplay();
+        display.setCursor(5, 12);
+        display.setTextSize(2);
+        display.println("REC STOP");
+        display.display();
+
+        digitalWrite(SPEAKER_PIN, HIGH);
+        delay(100);
+        delay(100);
+        digitalWrite(SPEAKER_PIN, LOW);
+
+        delay(500);
+        display.clearDisplay();
+      }
     }
   }
 
@@ -359,10 +417,41 @@ void loop() {
     if (liveCapture) {  // If recording in live capture mode
       if (captureActive) {  // If displaying recording symbol
         captureActive = false;
+        display.clearDisplay();
+        display.setCursor(5, 12);
+        display.setTextSize(2);
+        display.println("REC STOP");
+        display.display();
+
+        digitalWrite(SPEAKER_PIN, HIGH);
+        delay(100);
+        delay(100);
+        digitalWrite(SPEAKER_PIN, LOW);
+
+        delay(500);
+        display.clearDisplay();
       }
       else {
         recordDot.setTimer(REC_BLINK_DELAY);
+        recordTimer.setTimer(REC_LIVE_INTERVAL);
         captureActive = true;
+
+        display.clearDisplay();
+        display.setCursor(15, 12);
+        display.setTextSize(2);
+        display.println("REC START");
+        display.display();
+
+        digitalWrite(SPEAKER_PIN, HIGH);
+        delay(100);
+        digitalWrite(SPEAKER_PIN, LOW);
+        delay(100);
+        digitalWrite(SPEAKER_PIN, HIGH);
+        delay(100);
+        digitalWrite(SPEAKER_PIN, LOW);
+
+        delay(500);
+        display.clearDisplay();
       }
     } else if (manualCapture) {
       if (captureActive) {
@@ -393,52 +482,18 @@ void loop() {
   }
 
 
+  if (liveCapture && captureActive) {
+    if (recordTimer.isFinished()) {
+      recordTimer.setTimer(REC_LIVE_INTERVAL);
+    }
+  }
+
   if (! bmp.performReading()) {
   Serial.println("Failed to perform reading :(");
   return;
   }
-  Serial.print("Temperature = ");
-  Serial.print(bmp.temperature);
-  Serial.println(" *C");
-
-  Serial.print("Pressure = ");
-  Serial.print(bmp.pressure / 100.0);
-  Serial.println(" hPa");
-
-  Serial.print("Approx. Altitude = ");
-  Serial.print(static_cast<int>((bmp.readAltitude(SEALEVELPRESSURE_HPA) * 3.28084) + .5));
-  Serial.println(" ft");
-
-  Serial.println();
   
   delay(10);
-}
-
-void testscrolltext(void) {
-  display.clearDisplay();
-
-  display.setTextSize(2); // Draw 2X-scale text
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 0);
-  display.println(F("scroll"));
-  display.display();      // Show initial text
-  delay(100);
-
-  // Scroll in various directions, pausing in-between:
-  display.startscrollright(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrollleft(0x00, 0x0F);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
-  display.startscrolldiagright(0x00, 0x07);
-  delay(2000);
-  display.startscrolldiagleft(0x00, 0x07);
-  delay(2000);
-  display.stopscroll();
-  delay(1000);
 }
 
 void checkRecordDot() {
