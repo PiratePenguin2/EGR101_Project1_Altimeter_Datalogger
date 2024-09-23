@@ -12,7 +12,9 @@
 
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BMP3XX.h"
-#include <SD.h>
+#include "SD.h"
+#include "FS.h"
+
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -35,7 +37,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define CSV_FILE_NAME "data"
 #define TEXT_FILE_NAME "metadata"
 #define SD_CS_PIN 5  // SD Card CS pin (adjust as per your wiring)
-#define RECORDING_SLOTS 14
+#define RECORDING_SLOTS 20
 
 enum Menus {
   MENU_0,
@@ -169,7 +171,10 @@ void displayScreen(int id, bool clear=false, bool update=false) {
     case MENU_2:
       display.println("Storage");
       display.setCursor(0, 10);
-      display.println("9 / 20 Records Used");
+      display.print("9");
+      display.print(" / ");
+      display.print(RECORDING_SLOTS);
+      display.println(" Records Used");
       break;
 
     case MENU_3:
@@ -317,7 +322,8 @@ void setup() {
   digitalWrite(SPEAKER_PIN, LOW);
 
   // Create a new recording folder and files
-  createNewRecording("REC_");
+
+
 }
 
 void loop() {
@@ -449,6 +455,7 @@ void loop() {
         display.clearDisplay();
       }
       else {
+        createNewRecording("/REC_");
         recordDot.setTimer(REC_BLINK_DELAY);
         recordTimer.setTimer(REC_LIVE_INTERVAL);
         captureActive = true;
@@ -475,6 +482,7 @@ void loop() {
         // idk man
       } else {
         captureActive = true;
+        createNewRecording("/REC_");
       }
 
       display.clearDisplay();
@@ -505,7 +513,7 @@ void loop() {
     }
   }
 
-  if (! bmp.performReading()) {
+  if (!bmp.performReading()) {
   Serial.println("Failed to perform reading :(");
   return;
   }
