@@ -34,7 +34,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define CSV_FILE_NAME "data"
 #define TEXT_FILE_NAME "metadata"
-#define SD_CS_PIN 10  // SD Card CS pin (adjust as per your wiring)
+#define SD_CS_PIN 5  // SD Card CS pin (adjust as per your wiring)
 #define RECORDING_SLOTS 11
 
 enum Menus {

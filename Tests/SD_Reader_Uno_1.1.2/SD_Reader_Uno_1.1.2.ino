@@ -77,10 +77,7 @@ bool createRecording(String folderName) {
 bool createCSVFile(String csvFileName) {
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
-        csvFile.println("Time,Sensor1,Sensor2");  // CSV header
-        csvFile.println("10:00,23.5,1013");       // Example data
-        csvFile.println("10:05,23.6,1012");
-        csvFile.println("10:10,24.5,1025");
+        csvFile.println("Pressure,Altitude,Temperature");  // CSV header
         csvFile.close();
         Serial.println("CSV file created and data written: " + csvFileName);
         return true;
