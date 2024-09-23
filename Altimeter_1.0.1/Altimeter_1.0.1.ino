@@ -58,6 +58,8 @@ double currentAltitude = 0;
 double maxAltitude = 0;
 //int count = 0;
 
+String currentRecording;
+
 Adafruit_BMP3XX bmp;
 
 Menus menuId = MENU_0;
@@ -515,6 +517,8 @@ void loop() {
         createNewRecording("/REC_");
       }
 
+      storeData();
+
       display.clearDisplay();
       display.setCursor(15, 12);
       display.setTextSize(2);
@@ -539,6 +543,7 @@ void loop() {
 
   if (liveCapture && captureActive) {
     if (recordTimer.isFinished()) {
+      storeData();
       recordTimer.setTimer(REC_LIVE_INTERVAL);
     }
   }
@@ -558,6 +563,26 @@ void checkRecordDot() {
   }
 }
 
+void storeData() {
+  // Open the CSV file in append mode
+  File dataFile = SD.open(currentRecording + ".csv", FILE_APPEND);
+  
+  if (dataFile) {
+    // Write the currentAltitude to the file
+    dataFile.print(currentAltitude);  // Writing altitude value
+    dataFile.print(",");              // Add comma separator for CSV format
+    
+    // If you have other data to log, add it here (e.g., timestamp, temperature, etc.)
+    // dataFile.print(otherData);     // Add more data as needed
+    
+    dataFile.println();               // Move to the next line after the current data
+    
+    dataFile.close();                 // Close the file to ensure the data is saved
+    Serial.println("Data stored successfully.");
+  } else {
+    Serial.println("Error opening file for writing.");
+  }
+}
 
 bool createNewRecording(String baseName) {
     for (int i = 1; i <= RECORDING_SLOTS; i++) {
@@ -576,6 +601,7 @@ bool createNewRecording(String baseName) {
         // Check if recording folder can be created
         if (createRecording(folderName)) {
             Serial.println("Recording created: " + folderName);
+            currentRecording = folderName;
             return true;
         }
     }
