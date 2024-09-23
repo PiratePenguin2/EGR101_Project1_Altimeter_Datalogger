@@ -37,7 +37,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define CSV_FILE_NAME "data"
 #define TEXT_FILE_NAME "metadata"
 #define SD_CS_PIN 5  // SD Card CS pin (adjust as per your wiring)
-#define RECORDING_SLOTS 20
+#define RECORDING_SLOTS 200
 
 enum Menus {
   MENU_0,
@@ -65,6 +65,36 @@ Menus menuId = MENU_0;
 Timer recordDot, recordTimer;
 
 Sensor btn1, btn2, btn3, btn4;
+
+
+
+int countRECDirectories(fs::FS &fs, const char *dirname = "/", uint8_t levels = 0) {
+  File root = fs.open(dirname);
+  if (!root || !root.isDirectory()) {
+    Serial.println("Failed to open directory or directory is invalid.");
+    return 0;
+  }
+
+  int recDirCount = 0;
+  File file = root.openNextFile();
+  
+  while (file) {
+    if (file.isDirectory()) {
+      String dirName = file.name();
+      if (dirName.startsWith("REC")) {
+        recDirCount++;
+      }
+      if (levels && recDirCount > 0) {
+        // Recursively count in subdirectories if needed
+        recDirCount += countRECDirectories(fs, file.name(), levels - 1);
+      }
+    }
+    file = root.openNextFile();
+  }
+
+  return recDirCount;
+}
+
 
 void displayMenu(Menus id, bool clear=false, bool update=false) {
   menuId = id;
@@ -171,7 +201,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
     case MENU_2:
       display.println("Storage");
       display.setCursor(0, 10);
-      display.print("9");
+      display.print(countRECDirectories(SD));
       display.print(" / ");
       display.print(RECORDING_SLOTS);
       display.println(" Records Used");
@@ -608,3 +638,4 @@ bool createTextFile(String txtFileName) {
         return false;
     }
 }
+
