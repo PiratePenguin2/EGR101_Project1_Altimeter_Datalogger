@@ -562,7 +562,7 @@ void checkRecordDot() {
 bool createNewRecording(String baseName) {
     for (int i = 1; i <= RECORDING_SLOTS; i++) {
         // Format folder name with leading zeros (001, 002, ...)
-        String folderNum;
+        String folderNumber;
         if (i < 10) {
           folderNumber = "00" + String(i);
         } else if (i < 100) {
@@ -571,7 +571,7 @@ bool createNewRecording(String baseName) {
           folderNumber = String(i);
         }
 
-        String folderName = baseName + folderNum;
+        String folderName = baseName + folderNumber;
 
         // Check if recording folder can be created
         if (createRecording(folderName)) {
@@ -646,4 +646,3 @@ bool createTextFile(String txtFileName) {
         return false;
     }
 }
-
