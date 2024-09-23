@@ -540,7 +540,7 @@ bool createNewRecording(String baseName) {
         } else {
           folderNumber = String(i);
         }
-        
+
         String folderName = baseName + folderNum;
 
         // Check if recording folder can be created
