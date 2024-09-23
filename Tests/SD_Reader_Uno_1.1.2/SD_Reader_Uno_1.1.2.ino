@@ -4,6 +4,7 @@
 #define CSV_FILE_NAME "data"
 #define TEXT_FILE_NAME "metadata"
 #define SD_CS_PIN 10  // SD Card CS pin (adjust as per your wiring)
+#define RECORDING_SLOTS 11
 
 void setup() {
     Serial.begin(9600);
@@ -25,7 +26,7 @@ void loop() {
 }
 
 bool createNewRecording(String baseName) {
-    for (int i = 1; i <= 9; i++) {
+    for (int i = 1; i <= RECORDING_SLOTS; i++) {
         // Format folder name with leading zeros (001, 002, ...)
         String folderNum = (i < 10) ? "00" + String(i) : "0" + String(i);
         String folderName = baseName + folderNum;

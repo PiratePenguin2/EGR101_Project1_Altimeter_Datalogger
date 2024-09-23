@@ -12,6 +12,8 @@
 
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BMP3XX.h"
+#include <SPI.h>
+#include <SD.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -29,6 +31,11 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define SPEAKER_PIN 15
 
 #define REC_BLINK_DELAY 650
+
+#define CSV_FILE_NAME "data"
+#define TEXT_FILE_NAME "metadata"
+#define SD_CS_PIN 10  // SD Card CS pin (adjust as per your wiring)
+#define RECORDING_SLOTS 11
 
 enum Menus {
   MENU_0,
@@ -121,7 +128,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
         display.setCursor(103, 20);
         display.println("ft");
       } else {
-        display.print(currentAltitude);
+        display.print(static_cast<int>(currentAltitude));
         display.println("m");
       }
       display.setTextSize(1.5);
@@ -246,6 +253,14 @@ void setup() {
     for(;;); // Don't proceed, loop forever
   }
 
+  // Initialize SD card
+  if (!SD.begin(SD_CS_PIN)) {
+    Serial.println("SD card initialization failed!");
+    return;
+  }
+
+    Serial.println("SD card initialized.");
+
   display.display();
   display.clearDisplay();
 
@@ -276,6 +291,8 @@ void setup() {
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
   //testscrolltext();    // Draw scrolling text
 
+  // Create a new recording folder and files
+  createNewRecording("REC_");
 }
 
 void loop() {
@@ -447,3 +464,85 @@ void checkRecordDot() {
     recordDot.setTimer(REC_BLINK_DELAY);
   }
 }
+
+
+bool createNewRecording(String baseName) {
+    for (int i = 1; i <= RECORDING_SLOTS; i++) {
+        // Format folder name with leading zeros (001, 002, ...)
+        String folderNum = (i < 10) ? "00" + String(i) : "0" + String(i);
+        String folderName = baseName + folderNum;
+
+        // Check if recording folder can be created
+        if (createRecording(folderName)) {
+            Serial.println("Recording created: " + folderName);
+            return true;
+        }
+    }
+
+    Serial.println("TOO MANY FILES - Unable to create new recording.");
+    return false;
+}
+
+bool createRecording(String folderName) {
+    // Check if folder already exists
+    if (SD.exists(folderName.c_str())) {
+        Serial.println("Directory already exists: " + folderName);
+        return false;
+    }
+
+    // Try to create the folder
+    if (!SD.mkdir(folderName.c_str())) {
+        Serial.println("Failed to create directory: " + folderName);
+        return false;
+    }
+
+    Serial.println("Directory created: " + folderName);
+
+    // Create and write to CSV file
+    String csvFileName = folderName + "/" + CSV_FILE_NAME + ".csv";
+    if (!createCSVFile(csvFileName)) {
+        Serial.println("Failed to create CSV file.");
+        return false;
+    }
+
+    // Create and write to metadata TXT file
+    String txtFileName = folderName + "/" + TEXT_FILE_NAME + ".txt";
+    if (!createTextFile(txtFileName)) {
+        Serial.println("Failed to create text file.");
+        return false;
+    }
+
+    return true;
+}
+
+bool createCSVFile(String csvFileName) {
+    File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
+    if (csvFile) {
+        csvFile.println("Time,Sensor1,Sensor2");  // CSV header
+        csvFile.println("10:00,23.5,1013");       // Example data
+        csvFile.println("10:05,23.6,1012");
+        csvFile.println("10:10,24.5,1025");
+        csvFile.close();
+        Serial.println("CSV file created and data written: " + csvFileName);
+        return true;
+    } else {
+        Serial.println("Failed to open CSV file: " + csvFileName);
+        return false;
+    }
+}
+
+bool createTextFile(String txtFileName) {
+    File txtFile = SD.open(txtFileName.c_str(), FILE_WRITE);
+    if (txtFile) {
+        txtFile.println("Recording Date: 2024-09-19");
+        txtFile.println("Sensor: BMP388");
+        txtFile.println("Comments: Test recording with sample data.");
+        txtFile.close();
+        Serial.println("Text file created and metadata written: " + txtFileName);
+        return true;
+    } else {
+        Serial.println("Failed to open text file: " + txtFileName);
+        return false;
+    }
+}
+
