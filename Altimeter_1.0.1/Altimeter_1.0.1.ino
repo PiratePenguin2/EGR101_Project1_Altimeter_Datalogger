@@ -12,7 +12,6 @@
 
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BMP3XX.h"
-#include <SPI.h>
 #include <SD.h>
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -36,7 +35,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define CSV_FILE_NAME "data"
 #define TEXT_FILE_NAME "metadata"
 #define SD_CS_PIN 5  // SD Card CS pin (adjust as per your wiring)
-#define RECORDING_SLOTS 11
+#define RECORDING_SLOTS 14
 
 enum Menus {
   MENU_0,
@@ -273,37 +272,23 @@ void showRecordingState(bool show) {
 void setup() {
   Serial.begin(9600);
 
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
-
   // Initialize SD card
   if (!SD.begin(SD_CS_PIN)) {
     Serial.println("SD card initialization failed!");
     return;
   }
 
-    Serial.println("SD card initialized.");
+  Serial.println("SD card initialized.");
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;); // Don't proceed, loop forever
+  }
 
   display.display();
   display.clearDisplay();
 
-  btn1.attach(BUTTON_1_PIN);
-  btn2.attach(BUTTON_2_PIN);
-  btn3.attach(BUTTON_3_PIN);
-  btn4.attach(BUTTON_4_PIN);
-
-  pinMode(SPEAKER_PIN, OUTPUT);
-  
-  digitalWrite(SPEAKER_PIN, HIGH);
-  delay(100);
-  digitalWrite(SPEAKER_PIN, LOW);
-  delay(100);
-  digitalWrite(SPEAKER_PIN, HIGH);
-  delay(100);
-  digitalWrite(SPEAKER_PIN, LOW);
-
+  // Initialize BMP388 sensor
   if (!bmp.begin_I2C()) {
     Serial.println("Could not find a valid BMP388 sensor, check wiring!");
     while (1);
@@ -314,7 +299,22 @@ void setup() {
   bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
   bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
   bmp.setOutputDataRate(BMP3_ODR_50_HZ);
-  //testscrolltext();    // Draw scrolling text
+
+  // Attach button pins
+  btn1.attach(BUTTON_1_PIN);
+  btn2.attach(BUTTON_2_PIN);
+  btn3.attach(BUTTON_3_PIN);
+  btn4.attach(BUTTON_4_PIN);
+
+  // Initialize speaker
+  pinMode(SPEAKER_PIN, OUTPUT);
+  digitalWrite(SPEAKER_PIN, HIGH);
+  delay(100);
+  digitalWrite(SPEAKER_PIN, LOW);
+  delay(100);
+  digitalWrite(SPEAKER_PIN, HIGH);
+  delay(100);
+  digitalWrite(SPEAKER_PIN, LOW);
 
   // Create a new recording folder and files
   createNewRecording("REC_");
@@ -600,4 +600,3 @@ bool createTextFile(String txtFileName) {
         return false;
     }
 }
-
