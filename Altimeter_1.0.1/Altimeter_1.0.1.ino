@@ -565,7 +565,7 @@ void checkRecordDot() {
 
 void storeData() {
   // Open the CSV file in append mode
-  File dataFile = SD.open(currentRecording + ".csv", FILE_APPEND);
+  File dataFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
   
   if (dataFile) {
     // Write the currentAltitude to the file
