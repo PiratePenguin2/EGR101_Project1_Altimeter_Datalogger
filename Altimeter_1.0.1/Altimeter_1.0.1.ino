@@ -93,7 +93,7 @@ const char index_html[] PROGMEM = R"rawliteral(
             fetch('/altitude')
                 .then(response => response.text())
                 .then(data => {
-                    document.getElementById('altitude').innerText = data + ' ft';
+                    document.getElementById('altitude').innerText = data + ' m';
                 })
                 .catch(error => console.error('Error fetching altitude:', error));
         }
@@ -113,7 +113,7 @@ enum Menus {
 };
 const int NUM_MENUS = 5;
 
-bool menuActive = true;
+bool menuActive = false;
 bool liveCapture = true;
 bool manualCapture = false;
 bool showRecord = false;
@@ -201,6 +201,7 @@ void displayMenu(Menus id, bool clear=false, bool update=false) {
 
     case MENU_4:
       display.println("Wifi");
+      break;
 
     default:
       display.println("Undefined Menu");
@@ -288,17 +289,20 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       break;
 
     case MENU_4:
-      display.println("Wifi");
-      display.setCursor(0, 10);
+      display.print("Wifi");
       if (WiFi.status() == WL_CONNECTED) {
         display.setTextSize(1);
-        display.print("Connected to ");
+        display.println(" Connected");
+        display.setCursor(0, 10);
+        display.print("SSID: ");
         display.println(ssid);
+        display.setCursor(0, 20);
         display.print("IP: ");
         display.println(WiFi.localIP());
       } else {
-        display.println("Disconnected");
+        display.print(" Disconnected");
       }
+      break;
     
     default:
       display.println("Undefined Menu");
