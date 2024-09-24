@@ -189,7 +189,7 @@ void displayMenu(Menus id, bool clear=false, bool update=false) {
       display.println("Storage");
       break;
 
-    case MENU_3:
+    case MENU_4:
       display.println("Switch to");
       display.setCursor(10, 16);
       if (useMeters) {
@@ -199,7 +199,7 @@ void displayMenu(Menus id, bool clear=false, bool update=false) {
       }
       break;
 
-    case MENU_4:
+    case MENU_3:
       display.println("Wifi");
       break;
 
@@ -276,7 +276,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       display.println(" Records Used");
       break;
 
-    case MENU_3:
+    case MENU_4:
       if (useMeters) {
         useMeters = false;
       } else {
@@ -288,7 +288,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       digitalWrite(SPEAKER_PIN, LOW);
       break;
 
-    case MENU_4:
+    case MENU_3:
       display.print("Wifi");
       if (WiFi.status() == WL_CONNECTED) {
         display.setTextSize(1);
@@ -296,7 +296,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
         display.setCursor(0, 10);
         display.print("SSID: ");
         display.println(ssid);
-        display.setCursor(0, 20);
+        display.setCursor(15, 20);
         display.print("IP: ");
         display.println(WiFi.localIP());
       } else {
