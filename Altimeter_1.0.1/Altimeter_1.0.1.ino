@@ -14,6 +14,8 @@
 #include "Adafruit_BMP3XX.h"
 #include "SD.h"
 #include "FS.h"
+#include <WiFi.h>
+#include <ESPAsyncWebServer.h>
 
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -39,13 +41,77 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define SD_CS_PIN 5  // SD Card CS pin (adjust as per your wiring)
 #define RECORDING_SLOTS 200
 
+
+const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
+const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
+
+AsyncWebServer server(80);
+
+
+// HTML for the web page
+const char index_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altimeter Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+        }
+        header {
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+        #liveReadout {
+            font-size: 2em;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Altimeter Dashboard</h1>
+    </header>
+    <main>
+        <div id="liveReadout">
+            <h1>Live Readout</h1>
+            <p>Altitude: <span id="altitude">Waiting for data...</span></p>
+        </div>
+    </main>
+    <script>
+        function fetchAltitude() {
+            fetch('/altitude')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('altitude').innerText = data + ' ft';
+                })
+                .catch(error => console.error('Error fetching altitude:', error));
+        }
+        setInterval(fetchAltitude, 500);
+    </script>
+</body>
+</html>
+)rawliteral";
+
+
 enum Menus {
   MENU_0,
   MENU_1,
   MENU_2,
-  MENU_3
+  MENU_3, 
+  MENU_4
 };
-const int NUM_MENUS = 4;
+const int NUM_MENUS = 5;
 
 bool menuActive = true;
 bool liveCapture = true;
@@ -67,8 +133,6 @@ Menus menuId = MENU_0;
 Timer recordDot, recordTimer;
 
 Sensor btn1, btn2, btn3, btn4;
-
-
 
 int countRECDirectories(fs::FS &fs, const char *dirname = "/", uint8_t levels = 0) {
   File root = fs.open(dirname);
@@ -96,7 +160,6 @@ int countRECDirectories(fs::FS &fs, const char *dirname = "/", uint8_t levels = 
 
   return recDirCount;
 }
-
 
 void displayMenu(Menus id, bool clear=false, bool update=false) {
   menuId = id;
@@ -135,7 +198,10 @@ void displayMenu(Menus id, bool clear=false, bool update=false) {
         display.println("Meters");
       }
       break;
-    
+
+    case MENU_4:
+      display.println("Wifi");
+
     default:
       display.println("Undefined Menu");
       for(;;);
@@ -220,6 +286,19 @@ void displayScreen(int id, bool clear=false, bool update=false) {
       delay(100);
       digitalWrite(SPEAKER_PIN, LOW);
       break;
+
+    case MENU_4:
+      display.println("Wifi");
+      display.setCursor(0, 10);
+      if (WiFi.status() == WL_CONNECTED) {
+        display.setTextSize(1);
+        display.print("Connected to ");
+        display.println(ssid);
+        display.print("IP: ");
+        display.println(WiFi.localIP());
+      } else {
+        display.println("Disconnected");
+      }
     
     default:
       display.println("Undefined Menu");
@@ -343,6 +422,16 @@ void setup() {
   btn3.attach(BUTTON_3_PIN);
   btn4.attach(BUTTON_4_PIN);
 
+
+  WiFi.begin(ssid, password); // Connect to Wi-Fi
+  
+  Serial.println("Connected to WiFi!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());  // Print the IP address
+
+  // Initialize the web server
+  initWebServer(server, currentAltitude);
+
   // Initialize speaker
   pinMode(SPEAKER_PIN, OUTPUT);
   digitalWrite(SPEAKER_PIN, HIGH);
@@ -359,6 +448,7 @@ void setup() {
 }
 
 void loop() {
+
   btn1.update(); btn2.update(); btn3.update(); btn4.update();
   checkRecordDot();
 
@@ -554,6 +644,9 @@ void loop() {
   Serial.println("Failed to perform reading :(");
   return;
   }
+
+
+  //updateAltitude(currentAltitude);
   
   delay(10);
 }
@@ -654,7 +747,7 @@ bool createCSVFile(String csvFileName) {
         Serial.println("Failed to open CSV file: " + csvFileName);
         return false;
     }
-}
+} 
 
 bool createTextFile(String txtFileName) {
     File txtFile = SD.open(txtFileName.c_str(), FILE_WRITE);
@@ -669,4 +762,20 @@ bool createTextFile(String txtFileName) {
         Serial.println("Failed to open text file: " + txtFileName);
         return false;
     }
+}
+
+// Function to initialize the web server
+void initWebServer(AsyncWebServer &server, double &currentAltitude) {
+    // Serve the HTML page
+    server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
+        request->send_P(200, "text/html", index_html);
+    });
+
+    // Serve the altitude data
+    server.on("/altitude", HTTP_GET, [&](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", String(currentAltitude));
+    });
+
+    // Start the server
+    server.begin();
 }
