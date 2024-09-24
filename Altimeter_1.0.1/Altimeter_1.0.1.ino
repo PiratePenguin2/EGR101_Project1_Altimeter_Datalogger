@@ -56,7 +56,7 @@ bool captureActive = false;
 bool useMeters = false;
 double currentAltitude = 0;
 double maxAltitude = 0;
-//int count = 0;
+int frameCount = 0;
 
 String currentRecording;
 
@@ -434,6 +434,7 @@ void loop() {
     } else {
       if (manualCapture) {
         captureActive = false;
+        frameCount = 0;
         display.clearDisplay();
         display.setCursor(5, 12);
         display.setTextSize(2);
@@ -450,6 +451,7 @@ void loop() {
 
       } else if (liveCapture) {
         captureActive = false;
+        frameCount = 0;
         display.clearDisplay();
         display.setCursor(5, 12);
         display.setTextSize(2);
@@ -565,17 +567,16 @@ void checkRecordDot() {
 
 void storeData() {
   // Open the CSV file in append mode
-  File dataFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
+  File csvFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
   
   if (dataFile) {
+    frameCount++;
     // Write the currentAltitude to the file
-    dataFile.print(currentAltitude);  // Writing altitude value
-    dataFile.print(",");              // Add comma separator for CSV format
+    csvFile.print(frameCount);       // Writing frame value
+    csvFile.print(",");              // Add comma separator for CSV format
+    csvFile.print(currentAltitude);  // Writing altitude value
     
-    // If you have other data to log, add it here (e.g., timestamp, temperature, etc.)
-    // dataFile.print(otherData);     // Add more data as needed
-    
-    dataFile.println();               // Move to the next line after the current data
+    csvFile.println();               // Move to the next line after the current data
     
     dataFile.close();                 // Close the file to ensure the data is saved
     Serial.println("Data stored successfully.");
@@ -645,10 +646,7 @@ bool createRecording(String folderName) {
 bool createCSVFile(String csvFileName) {
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
-        csvFile.println("Time,Sensor1,Sensor2");  // CSV header
-        csvFile.println("10:00,23.5,1013");       // Example data
-        csvFile.println("10:05,23.6,1012");
-        csvFile.println("10:10,24.5,1025");
+        csvFile.println("Number,Altitude");  // CSV header
         csvFile.close();
         Serial.println("CSV file created and data written: " + csvFileName);
         return true;
