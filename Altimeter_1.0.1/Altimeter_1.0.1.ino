@@ -666,7 +666,7 @@ void storeData() {
   // Open the CSV file in append mode
   File csvFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
   
-  if (dataFile) {
+  if (csvFile) {
     frameCount++;
     // Write the currentAltitude to the file
     csvFile.print(frameCount);       // Writing frame value
@@ -675,7 +675,7 @@ void storeData() {
     
     csvFile.println();               // Move to the next line after the current data
     
-    dataFile.close();                 // Close the file to ensure the data is saved
+    csvFile.close();                 // Close the file to ensure the data is saved
     Serial.println("Data stored successfully.");
   } else {
     Serial.println("Error opening file for writing.");
