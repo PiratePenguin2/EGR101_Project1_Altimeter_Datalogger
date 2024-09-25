@@ -57,6 +57,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Altimeter Dashboard</title>
     <style>
+        /* Apply SF Pro system font */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
@@ -66,29 +67,118 @@ const char index_html[] PROGMEM = R"rawliteral(
         }
         header {
             background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        header nav {
+            display: flex;
+            justify-content: center;
+        }
+        header nav a {
+            color: #0071e3;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 0 15px;
+            line-height: 1.6;
+            font-size: 18px;
+        }
+        header nav a:hover {
+            text-decoration: underline;
+        }
+        main {
+            margin-top: 80px; /* To avoid overlap with the header */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
         }
         #liveReadout {
             font-size: 2em;
             background-color: #fff;
             padding: 20px;
             border-radius: 10px;
-            margin-top: 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #6e6e73;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Altimeter Dashboard</h1>
+        <nav>
+            <a href="#home" onclick="showSection('home')">Home</a>
+            <a href="#flightLogs" onclick="showSection('flightLogs')">Flight Logs</a>
+            <a href="#liveReadout" onclick="showSection('liveReadout')">Live Readout</a>
+            <a href="#sdCardStorage" onclick="showSection('sdCardStorage')">SD Card Storage</a>
+        </nav>
     </header>
-    <main>
+
+    <main id="homeSection">
         <div id="liveReadout">
             <h1>Live Readout</h1>
             <p>Altitude: <span id="altitude">Waiting for data...</span></p>
+            <p>Time: <span id="time">Waiting for data...</span></p>
         </div>
     </main>
+
+    <main id="flightLogsSection" style="display: none;">
+        <h1>Flight Logs</h1>
+        <p>Coming soon...</p>
+    </main>
+
+    <main id="liveReadoutSection" style="display: none;">
+        <h1>Live Readout Page</h1>
+        <p>This will show live data from your altimeter.</p>
+    </main>
+
+    <main id="sdCardStorageSection" style="display: none;">
+        <h1>SD Card Storage</h1>
+        <p>Access and manage your SD card data here.</p>
+    </main>
+
+    <footer>
+        <p>Altimeter Dashboard © 2024</p>
+    </footer>
+
     <script>
+        // Function to toggle between sections
+        function showSection(section) {
+            document.getElementById('homeSection').style.display = 'none';
+            document.getElementById('flightLogsSection').style.display = 'none';
+            document.getElementById('liveReadoutSection').style.display = 'none';
+            document.getElementById('sdCardStorageSection').style.display = 'none';
+
+            if (section === 'home') {
+                document.getElementById('homeSection').style.display = 'flex';
+            } else if (section === 'flightLogs') {
+                document.getElementById('flightLogsSection').style.display = 'block';
+            } else if (section === 'liveReadout') {
+                document.getElementById('liveReadoutSection').style.display = 'block';
+            } else if (section === 'sdCardStorage') {
+                document.getElementById('sdCardStorageSection').style.display = 'block';
+            }
+        }
+
+        // Example of updating live readout (you can replace this with real data)
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('altitude').innerText = Math.floor(Math.random() * 10000) + ' ft';
+            document.getElementById('time').innerText = now.toLocaleTimeString();
+        }, 1000);
+
+	<script>
         function fetchAltitude() {
             fetch('/altitude')
                 .then(response => response.text())
@@ -101,6 +191,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     </script>
 </body>
 </html>
+
 )rawliteral";
 
 
@@ -134,7 +225,7 @@ Timer recordDot, recordTimer;
 
 Sensor btn1, btn2, btn3, btn4;
 
-int countRECDirectories(fs::FS &fs, const char *dirname = "/", uint8_t levels = 0) {
+int countRECDirectories(fs::FS &fs, const char *dirname = "/", uint8_t levels = 0) { // returns the amount of logs already stored, partially generated by ChatGPT
   File root = fs.open(dirname);
   if (!root || !root.isDirectory()) {
     Serial.println("Failed to open directory or directory is invalid.");
@@ -161,7 +252,7 @@ int countRECDirectories(fs::FS &fs, const char *dirname = "/", uint8_t levels = 
   return recDirCount;
 }
 
-void displayMenu(Menus id, bool clear=false, bool update=false) {
+void displayMenu(Menus id, bool clear=false, bool update=false) { // handles displaying of the menu pages
   menuId = id;
 
   display.setTextSize(2); // Draw 2X-scale text
@@ -215,7 +306,7 @@ void displayMenu(Menus id, bool clear=false, bool update=false) {
 
 }
 
-void displayScreen(int id, bool clear=false, bool update=false) {
+void displayScreen(int id, bool clear=false, bool update=false) { // handles displaying of the main pages
   display.setTextSize(1); // Draw 2X-scale text
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
@@ -317,7 +408,7 @@ void displayScreen(int id, bool clear=false, bool update=false) {
 
 }
 
-void swipeDown() {
+void swipeDown() { // downwards swipe animation, partially ChatGPT
   int swipeSpeed = 7; // Speed of swipe, increase to make it faster
 
   for (int y = 0; y <= SCREEN_HEIGHT+10; y += swipeSpeed) {
@@ -336,7 +427,7 @@ void swipeDown() {
   display.display();
 }
 
-void swipeRight() {
+void swipeRight() { // right swipe animation, partially ChatGPT
   int swipeSpeed = 14; // Speed of swipe, increase to make it faster
 
   for (int x = 0; x <= SCREEN_WIDTH; x += swipeSpeed) {
@@ -355,7 +446,7 @@ void swipeRight() {
   display.display();
 }
 
-void swipeLeft() {
+void swipeLeft() { // left swipe animation, partially ChatGPT
   int swipeSpeed = 14; // Speed of swipe, increase to make it faster
 
   for (int x = 0; x <= SCREEN_WIDTH; x += swipeSpeed) {
@@ -375,7 +466,7 @@ void swipeLeft() {
   display.display();
 }
 
-void showRecordingState(bool show) {
+void showRecordingState(bool show) { // Handles display/hide of flashing rec icon
   if (show) {
     display.setCursor(7, 20);
     if (liveCapture && captureActive) {
@@ -392,25 +483,34 @@ void showRecordingState(bool show) {
 void setup() {
   Serial.begin(9600);
 
-  // Initialize SD card
-  if (!SD.begin(SD_CS_PIN)) {
-    Serial.println("SD card initialization failed!");
-    return;
-  }
-
-  Serial.println("SD card initialized.");
-
+  /* Initialize Display */
   if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
-
   display.display();
   display.clearDisplay();
+
+  // Initialize SD card
+  if (!SD.begin(SD_CS_PIN)) {
+    Serial.println("SD card initialization failed!");
+    display.setCursor(5, 10);
+    display.setTextSize(1);
+    display.println("SD CARD MISSING");
+    display.display();
+    return;
+  }
+  Serial.println("SD card initialized.");
+
 
   // Initialize BMP388 sensor
   if (!bmp.begin_I2C()) {
     Serial.println("Could not find a valid BMP388 sensor, check wiring!");
+    display.clearDisplay();
+    display.setCursor(5, 10);
+    display.setTextSize(1);
+    display.println("BMP MISSING");
+    display.display();
     while (1);
   }
 
@@ -425,7 +525,6 @@ void setup() {
   btn2.attach(BUTTON_2_PIN);
   btn3.attach(BUTTON_3_PIN);
   btn4.attach(BUTTON_4_PIN);
-
 
   WiFi.begin(ssid, password); // Connect to Wi-Fi
   
@@ -445,19 +544,18 @@ void setup() {
   digitalWrite(SPEAKER_PIN, HIGH);
   delay(100);
   digitalWrite(SPEAKER_PIN, LOW);
-
-  // Create a new recording folder and files
-
-
 }
 
 void loop() {
 
+  // update primary functions
   btn1.update(); btn2.update(); btn3.update(); btn4.update();
   checkRecordDot();
 
+  // store current altitude
   currentAltitude = static_cast<int>((bmp.readAltitude(SEALEVELPRESSURE_HPA)) + .5);
 
+  // avoid miscalibration during first cycles
   if (currentAltitude > maxAltitude && currentAltitude < maxAltitude + 300) {
     maxAltitude = currentAltitude;
   }
@@ -486,7 +584,6 @@ void loop() {
     displayMenu(menuId, true, true);
   } else {
     displayScreen(menuId, true, false);
-    //do something else, show static page
 
     // display the recording symbol
     showRecordingState(showRecord);
