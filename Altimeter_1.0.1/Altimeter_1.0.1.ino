@@ -120,8 +120,8 @@ bool showRecord = false;
 bool captureActive = false;
 
 bool useMeters = false;
-double currentAltitude = 0;
-double maxAltitude = 0;
+double currentAltitude = 0.0;
+double maxAltitude = 0.0;
 int frameCount = 0;
 
 String currentRecording;
@@ -456,7 +456,7 @@ void loop() {
   btn1.update(); btn2.update(); btn3.update(); btn4.update();
   checkRecordDot();
 
-  currentAltitude = static_cast<int>((bmp.readAltitude(SEALEVELPRESSURE_HPA)) + .5);
+  currentAltitude = (static_cast<int>(bmp.readAltitude(SEALEVELPRESSURE_HPA) * 100.0)) / 100.0;
 
   if (currentAltitude > maxAltitude && currentAltitude < maxAltitude + 300) {
     maxAltitude = currentAltitude;
