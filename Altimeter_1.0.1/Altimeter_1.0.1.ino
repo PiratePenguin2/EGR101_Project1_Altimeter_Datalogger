@@ -57,7 +57,6 @@ const char index_html[] PROGMEM = R"rawliteral(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Altimeter Dashboard</title>
     <style>
-        /* Apply SF Pro system font */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             margin: 0;
@@ -67,118 +66,29 @@ const char index_html[] PROGMEM = R"rawliteral(
         }
         header {
             background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-        header nav {
-            display: flex;
-            justify-content: center;
-        }
-        header nav a {
-            color: #0071e3;
-            font-weight: 500;
-            text-decoration: none;
-            padding: 0 15px;
-            line-height: 1.6;
-            font-size: 18px;
-        }
-        header nav a:hover {
-            text-decoration: underline;
-        }
-        main {
-            margin-top: 80px; /* To avoid overlap with the header */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 80vh;
-        }
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
+            text-align: center;
         }
         #liveReadout {
             font-size: 2em;
             background-color: #fff;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        footer {
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            color: #6e6e73;
+            margin-top: 50px;
         }
     </style>
 </head>
 <body>
     <header>
-        <nav>
-            <a href="#home" onclick="showSection('home')">Home</a>
-            <a href="#flightLogs" onclick="showSection('flightLogs')">Flight Logs</a>
-            <a href="#liveReadout" onclick="showSection('liveReadout')">Live Readout</a>
-            <a href="#sdCardStorage" onclick="showSection('sdCardStorage')">SD Card Storage</a>
-        </nav>
+        <h1>Altimeter Dashboard</h1>
     </header>
-
-    <main id="homeSection">
+    <main>
         <div id="liveReadout">
             <h1>Live Readout</h1>
             <p>Altitude: <span id="altitude">Waiting for data...</span></p>
-            <p>Time: <span id="time">Waiting for data...</span></p>
         </div>
     </main>
-
-    <main id="flightLogsSection" style="display: none;">
-        <h1>Flight Logs</h1>
-        <p>Coming soon...</p>
-    </main>
-
-    <main id="liveReadoutSection" style="display: none;">
-        <h1>Live Readout Page</h1>
-        <p>This will show live data from your altimeter.</p>
-    </main>
-
-    <main id="sdCardStorageSection" style="display: none;">
-        <h1>SD Card Storage</h1>
-        <p>Access and manage your SD card data here.</p>
-    </main>
-
-    <footer>
-        <p>Altimeter Dashboard © 2024</p>
-    </footer>
-
     <script>
-        // Function to toggle between sections
-        function showSection(section) {
-            document.getElementById('homeSection').style.display = 'none';
-            document.getElementById('flightLogsSection').style.display = 'none';
-            document.getElementById('liveReadoutSection').style.display = 'none';
-            document.getElementById('sdCardStorageSection').style.display = 'none';
-
-            if (section === 'home') {
-                document.getElementById('homeSection').style.display = 'flex';
-            } else if (section === 'flightLogs') {
-                document.getElementById('flightLogsSection').style.display = 'block';
-            } else if (section === 'liveReadout') {
-                document.getElementById('liveReadoutSection').style.display = 'block';
-            } else if (section === 'sdCardStorage') {
-                document.getElementById('sdCardStorageSection').style.display = 'block';
-            }
-        }
-
-        // Example of updating live readout (you can replace this with real data)
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('altitude').innerText = Math.floor(Math.random() * 10000) + ' ft';
-            document.getElementById('time').innerText = now.toLocaleTimeString();
-        }, 1000);
-
-	<script>
         function fetchAltitude() {
             fetch('/altitude')
                 .then(response => response.text())
