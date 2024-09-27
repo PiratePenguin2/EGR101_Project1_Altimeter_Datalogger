@@ -788,15 +788,9 @@ void initWebServer(AsyncWebServer &server, String &currentWebAltitude) {
     });
 
     // Serve the altitude data
-    if (useMeters) {
-      server.on("/altitude", HTTP_GET, [&](AsyncWebServerRequest *request){
-          request->send(200, "text/plain", String(currentWebAltitude));
-      });
-    } else {
-      server.on("/altitude", HTTP_GET, [&](AsyncWebServerRequest *request){
-          request->send(200, "text/plain", String(currentWebAltitude));
-      });
-    }
+    server.on("/altitude", HTTP_GET, [&](AsyncWebServerRequest *request){
+        request->send(200, "text/plain", String(currentWebAltitude));
+    });
 
     // Start the server
     server.begin();
