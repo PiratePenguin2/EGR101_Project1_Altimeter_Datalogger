@@ -667,7 +667,7 @@ void loop() {
   delay(10);
 }
 
-void checkRecordDot() {
+void checkRecordDot() { // timer handler for the flashing record icon (required so that it doesn't stall the rest of the program with a delay())
   if (recordDot.isFinished()) {
     showRecord = !showRecord;
     recordDot.setTimer(REC_BLINK_DELAY);
@@ -752,12 +752,12 @@ bool createRecording(String folderName) {
     return true;
 }
 
-bool createCSVFile(String csvFileName) {
+bool createCSVFile(String csvFileName) { // create the csv file
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
         csvFile.println("Number,Altitude");  // CSV header
         csvFile.close();
-        Serial.println("CSV file created and data written: " + csvFileName);
+        //Serial.println("CSV file created and data written: " + csvFileName);
         return true;
     } else {
         Serial.println("Failed to open CSV file: " + csvFileName);
@@ -780,8 +780,7 @@ bool createTextFile(String txtFileName) {
     }
 }
 
-// Function to initialize the web server
-void initWebServer(AsyncWebServer &server, String &currentWebAltitude) {
+void initWebServer(AsyncWebServer &server, String &currentWebAltitude) { // init the web server, heavily modified from source ChatGPT
     // Serve the HTML page
     server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
         request->send_P(200, "text/html", index_html);
