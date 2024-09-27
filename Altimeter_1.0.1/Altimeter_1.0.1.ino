@@ -93,7 +93,7 @@ const char index_html[] PROGMEM = R"rawliteral(
             fetch('/altitude')
                 .then(response => response.text())
                 .then(data => {
-                    document.getElementById('altitude').innerText = data + ' m';
+                    document.getElementById('altitude').innerText = data;
                 })
                 .catch(error => console.error('Error fetching altitude:', error));
         }
@@ -122,6 +122,7 @@ bool captureActive = false;
 
 bool useMeters = false;
 double currentAltitude = 0.0;
+String currentWebAltitude = "0.0";
 double maxAltitude = 0.0;
 int frameCount = 0;
 
@@ -443,7 +444,7 @@ void setup() {
   Serial.println(WiFi.localIP());  // Print the IP address
 
   // Initialize the web server
-  initWebServer(server, currentAltitude);
+  initWebServer(server, currentWebAltitude);
 
   // Initialize speaker
   pinMode(SPEAKER_PIN, OUTPUT);
@@ -463,6 +464,11 @@ void loop() {
   checkRecordDot();
 
   currentAltitude = (static_cast<int>(bmp.readAltitude(SEALEVELPRESSURE_HPA) * 100.0)) / 100.0;
+  if (useMeters) {
+    currentWebAltitude = String(currentAltitude) + " m";
+  } else {
+    currentWebAltitude = String(currentAltitude * 3.28084) + " ft";
+  }
 
   // avoid miscalibration during first cycles
   if (currentAltitude > maxAltitude && currentAltitude < maxAltitude + 300) {
@@ -775,16 +781,22 @@ bool createTextFile(String txtFileName) {
 }
 
 // Function to initialize the web server
-void initWebServer(AsyncWebServer &server, double &currentAltitude) {
+void initWebServer(AsyncWebServer &server, String &currentWebAltitude) {
     // Serve the HTML page
     server.on("/", HTTP_GET, [&](AsyncWebServerRequest *request){
         request->send_P(200, "text/html", index_html);
     });
 
     // Serve the altitude data
-    server.on("/altitude", HTTP_GET, [&](AsyncWebServerRequest *request){
-        request->send(200, "text/plain", String(currentAltitude));
-    });
+    if (useMeters) {
+      server.on("/altitude", HTTP_GET, [&](AsyncWebServerRequest *request){
+          request->send(200, "text/plain", String(currentWebAltitude));
+      });
+    } else {
+      server.on("/altitude", HTTP_GET, [&](AsyncWebServerRequest *request){
+          request->send(200, "text/plain", String(currentWebAltitude));
+      });
+    }
 
     // Start the server
     server.begin();
