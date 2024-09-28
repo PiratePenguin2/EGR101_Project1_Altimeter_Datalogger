@@ -121,10 +121,13 @@ bool showRecord = false;
 bool captureActive = false;
 
 bool useMeters = false;
+double currentPressure = 0.0;
 double currentAltitude = 0.0;
+double currentTemp = 0.0;
 String currentWebAltitude = "0.0";
 double maxAltitude = 0.0;
 int frameCount = 0;
+int recordTimestamp = 0;
 
 String currentRecording;
 
@@ -680,10 +683,18 @@ void storeData() {
   
   if (csvFile) {
     frameCount++;
+    recordTimestamp = (frameCount - 1) * REC_LIVE_INTERVAL;
+
     // Write the currentAltitude to the file
     csvFile.print(frameCount);       // Writing frame value
-    csvFile.print(",");              // Add comma separator for CSV format
+    csvFile.print(",");              // Comma separator for CSV format
+    csvFile.print((recordTimestamp / 1000) + ":" + (recordTimestamp % 1000));
+    csvFile.print(",");              // Comma separator for CSV format
+    csvFile.print(currentPressure);  // Writing pressure value
+    csvFile.print(",");              // Comma separator for CSV format
     csvFile.print(currentAltitude);  // Writing altitude value
+    csvFile.print(",");              // Comma separator for CSV format
+    csvFile.print(currentTemp);      // Writing temperature value
     
     csvFile.println();               // Move to the next line after the current data
     
