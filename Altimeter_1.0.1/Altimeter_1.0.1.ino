@@ -110,9 +110,10 @@ enum Menus {
   MENU_1,
   MENU_2,
   MENU_3, 
-  MENU_4
+  MENU_4,
+  MENU_5
 };
-const int NUM_MENUS = 5;
+const int NUM_MENUS = 6;
 
 bool menuActive = false;
 bool liveCapture = true;
@@ -121,6 +122,8 @@ bool showRecord = false;
 bool captureActive = false;
 
 bool useMeters = false;
+bool applyOffset = false;
+double altOffset = 0.0;
 double currentPressure = 0.0;
 double currentAltitude = 0.0;
 double currentTemp = 0.0;
@@ -206,6 +209,15 @@ void displayMenu(Menus id, bool clear=false, bool update=false) { // handles dis
 
     case MENU_3:
       display.println("Wifi");
+      break;
+
+    case MENU_5:
+      if (applyOffset) {
+        display.print("Zero Altitude");
+      } else {
+        display.print("Zero Altitude");
+      }
+      display.display();
       break;
 
     default:
@@ -308,6 +320,24 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
         display.print(" Disconnected");
       }
       break;
+
+    case MENU_5:
+      display.setTextSize(1);
+      if (applyOffset) {
+        applyOffset = false;
+        display.print("Altitude Reset");
+      } else {
+        applyOffset = true;
+        display.print("Altitude Zeroed");
+        altOffset = currentAltitude;
+      }
+      display.display();
+      digitalWrite(SPEAKER_PIN, HIGH);
+      delay(200);
+      digitalWrite(SPEAKER_PIN, LOW);
+      delay(200);
+      menuActive = true;
+      break;
     
     default:
       display.println("Undefined Menu");
@@ -404,6 +434,7 @@ void setup() {
   }
   display.display();
   display.clearDisplay();
+  display.setRotation(2);
 
   // Initialize SD card
   if (!SD.begin(SD_CS_PIN)) {
@@ -467,6 +498,11 @@ void loop() {
   checkRecordDot();
 
   currentAltitude = (static_cast<int>(bmp.readAltitude(SEALEVELPRESSURE_HPA) * 100.0)) / 100.0;
+
+  if (applyOffset) {
+    currentAltitude = currentAltitude - altOffset;
+  }
+
   if (useMeters) {
     currentWebAltitude = String(currentAltitude) + " m";
   } else {
