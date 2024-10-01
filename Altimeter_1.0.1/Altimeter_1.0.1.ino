@@ -1,6 +1,6 @@
 /**
+* Source:
 * https://randomnerdtutorials.com/altimeter-datalogger-esp32-bmp388/
-*
  */
 
 #include <SPI.h>
@@ -9,7 +9,6 @@
 #include <Adafruit_SSD1306.h>
 #include "Timer.h"
 #include "Sensor.h"
-
 #include <Adafruit_Sensor.h>
 #include "Adafruit_BMP3XX.h"
 #include "SD.h"
@@ -17,6 +16,19 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 
+// Pin declarations
+#define BUTTON_1_PIN 26
+#define BUTTON_2_PIN 14
+#define BUTTON_3_PIN 12
+#define BUTTON_4_PIN 13
+#define SPEAKER_PIN 15
+#define SD_CS_PIN 5
+
+#define SEALEVELPRESSURE_HPA (1013.25)
+#define RECORDING_SLOTS 40
+
+const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
+const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -25,25 +37,13 @@
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-#define SEALEVELPRESSURE_HPA (1013.25)
-
-#define BUTTON_1_PIN 26
-#define BUTTON_2_PIN 14
-#define BUTTON_3_PIN 12
-#define BUTTON_4_PIN 13
-#define SPEAKER_PIN 15
 
 #define REC_BLINK_DELAY 650
 #define REC_LIVE_INTERVAL 500
 
 #define CSV_FILE_NAME "data"
 #define TEXT_FILE_NAME "metadata"
-#define SD_CS_PIN 5  // SD Card CS pin (adjust as per your wiring)
-#define RECORDING_SLOTS 200
 
-
-const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
-const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
 
 AsyncWebServer server(80);
 
@@ -131,6 +131,7 @@ String currentWebAltitude = "0.0";
 double maxAltitude = 0.0;
 int frameCount = 0;
 int recordTimestamp = 0;
+int numDirectories = 0;
 
 String currentRecording;
 
@@ -287,7 +288,7 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
     case MENU_2:
       display.println("Storage");
       display.setCursor(0, 10);
-      display.print(countRECDirectories(SD));
+      display.print(numDirectories);
       display.print(" / ");
       display.print(RECORDING_SLOTS);
       display.println(" Records Used");
@@ -518,6 +519,10 @@ void loop() {
   if (btn1.isTripped()) { // Toggles between the display screen and the menu
     if (menuActive) {
       menuActive = false;
+      if (menuId == MENU_2) {
+        // store num directories
+        numDirectories = countRECDirectories(SD);
+      }
       swipeRight();
     } else {
       menuActive = true;
