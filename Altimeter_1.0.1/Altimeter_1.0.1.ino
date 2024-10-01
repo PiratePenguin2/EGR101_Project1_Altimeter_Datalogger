@@ -725,13 +725,14 @@ void storeData() {
   File csvFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
   
   if (csvFile) {
-    //recordTimestamp = (frameCount - 1) * REC_LIVE_INTERVAL;
+    recordTimestamp = (frameCount - 1) * REC_LIVE_INTERVAL;
 
     // Write the currentAltitude to the file
     csvFile.print(frameCount);       // Writing frame value
     csvFile.print(",");              // Comma separator for CSV format
     //csvFile.print((recordTimestamp / 1000) + ":" + (recordTimestamp % 1000));
-    csvFile.print("00:00");
+    csvFile.print(recordTimestamp);
+    //csvFile.print("00:00");
     csvFile.print(",");              // Comma separator for CSV format
     csvFile.print(currentAltitude);  // Writing altitude value
     csvFile.print(",");              // Comma separator for CSV format
