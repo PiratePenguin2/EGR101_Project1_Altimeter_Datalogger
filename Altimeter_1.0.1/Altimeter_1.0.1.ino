@@ -499,6 +499,8 @@ void loop() {
   checkRecordDot();
 
   currentAltitude = (static_cast<int>(bmp.readAltitude(SEALEVELPRESSURE_HPA) * 100.0)) / 100.0;
+  currentPressure = bmp.readPressure();
+  currentTemp = bmp.readTemperature();
 
   if (applyOffset) {
     currentAltitude = currentAltitude - altOffset;
