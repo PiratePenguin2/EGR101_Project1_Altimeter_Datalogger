@@ -807,9 +807,8 @@ bool createRecording(String folderName) {
 bool createCSVFile(String csvFileName) { // create the csv file
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
-        csvFile.println("Number,Altitude");  // CSV header
+        csvFile.println("Number,Timestamp,Pressure,Altitude,Temperature");  // CSV header
         csvFile.close();
-        //Serial.println("CSV file created and data written: " + csvFileName);
         return true;
     } else {
         Serial.println("Failed to open CSV file: " + csvFileName);
@@ -820,7 +819,7 @@ bool createCSVFile(String csvFileName) { // create the csv file
 bool createTextFile(String txtFileName) {
     File txtFile = SD.open(txtFileName.c_str(), FILE_WRITE);
     if (txtFile) {
-        txtFile.println("Recording Date: 2024-09-19");
+        //txtFile.println("Recording Date: 2024-09-19");
         txtFile.println("Sensor: BMP388");
         txtFile.println("Comments: Test recording with sample data.");
         txtFile.close();
