@@ -588,7 +588,6 @@ void loop() {
     } else {
       if (manualCapture) {
         captureActive = false;
-        frameCount = 0;
         display.clearDisplay();
         display.setCursor(5, 12);
         display.setTextSize(2);
@@ -605,7 +604,6 @@ void loop() {
 
       } else if (liveCapture) {
         captureActive = false;
-        frameCount = 0;
         display.clearDisplay();
         display.setCursor(5, 12);
         display.setTextSize(2);
@@ -727,17 +725,17 @@ void storeData() {
   File csvFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
   
   if (csvFile) {
-    frameCount++;
-    recordTimestamp = (frameCount - 1) * REC_LIVE_INTERVAL;
+    //recordTimestamp = (frameCount - 1) * REC_LIVE_INTERVAL;
 
     // Write the currentAltitude to the file
     csvFile.print(frameCount);       // Writing frame value
     csvFile.print(",");              // Comma separator for CSV format
-    csvFile.print((recordTimestamp / 1000) + ":" + (recordTimestamp % 1000));
-    csvFile.print(",");              // Comma separator for CSV format
-    csvFile.print(currentPressure);  // Writing pressure value
+    //csvFile.print((recordTimestamp / 1000) + ":" + (recordTimestamp % 1000));
+    csvFile.print("00:00");
     csvFile.print(",");              // Comma separator for CSV format
     csvFile.print(currentAltitude);  // Writing altitude value
+    csvFile.print(",");              // Comma separator for CSV format
+    csvFile.print(currentPressure);  // Writing pressure value
     csvFile.print(",");              // Comma separator for CSV format
     csvFile.print(currentTemp);      // Writing temperature value
     
@@ -745,35 +743,37 @@ void storeData() {
     
     csvFile.close();                 // Close the file to ensure the data is saved
     Serial.println("Data stored successfully.");
+    frameCount++;
   } else {
     Serial.println("Error opening file for writing.");
   }
 }
 
 bool createNewRecording(String baseName) {
-    for (int i = 1; i <= RECORDING_SLOTS; i++) {
-        // Format folder name with leading zeros (001, 002, ...)
-        String folderNumber;
-        if (i < 10) {
-          folderNumber = "00" + String(i);
-        } else if (i < 100) {
-          folderNumber = "0" + String(i);
-        } else {
-          folderNumber = String(i);
-        }
+  frameCount = 0;
+  for (int i = 1; i <= RECORDING_SLOTS; i++) {
+      // Format folder name with leading zeros (001, 002, ...)
+      String folderNumber;
+      if (i < 10) {
+        folderNumber = "00" + String(i);
+      } else if (i < 100) {
+        folderNumber = "0" + String(i);
+      } else {
+        folderNumber = String(i);
+      }
 
-        String folderName = baseName + folderNumber;
+      String folderName = baseName + folderNumber;
 
-        // Check if recording folder can be created
-        if (createRecording(folderName)) {
-            Serial.println("Recording created: " + folderName);
-            currentRecording = folderName;
-            return true;
-        }
-    }
+      // Check if recording folder can be created
+      if (createRecording(folderName)) {
+          Serial.println("Recording created: " + folderName);
+          currentRecording = folderName;
+          return true;
+      }
+  }
 
-    Serial.println("TOO MANY FILES - Unable to create new recording.");
-    return false;
+  Serial.println("TOO MANY FILES - Unable to create new recording.");
+  return false;
 }
 
 bool createRecording(String folderName) {
@@ -811,7 +811,7 @@ bool createRecording(String folderName) {
 bool createCSVFile(String csvFileName) { // create the csv file
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
-        csvFile.println("Number,Timestamp,Pressure,Altitude,Temperature");  // CSV header
+        csvFile.println("Frame,Timestamp,Pressure,Altitude,Temperature");  // CSV header
         csvFile.close();
         return true;
     } else {
