@@ -727,7 +727,7 @@ void storeData() {
   File csvFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
   
   if (csvFile) {
-    recordTimestamp = (frameCount - 1) * REC_LIVE_INTERVAL;
+    recordTimestamp = frameCount * REC_LIVE_INTERVAL;
 
     // Write the currentAltitude to the file
     csvFile.print(frameCount);       // Writing frame value
@@ -814,7 +814,7 @@ bool createRecording(String folderName) {
 bool createCSVFile(String csvFileName) { // create the csv file
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
-        csvFile.println("Frame,Timestamp,Pressure,Altitude,Temperature");  // CSV header
+        csvFile.println("Frame,Timestamp,Altitude(m),Pressure(HPa),Temperature(C)");  // CSV header
         csvFile.close();
         return true;
     } else {
