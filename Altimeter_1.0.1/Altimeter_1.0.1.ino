@@ -24,11 +24,14 @@
 #define SPEAKER_PIN 15
 #define SD_CS_PIN 5
 
+// User variables
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define RECORDING_SLOTS 40
 
+// Wifi credentials (required)
 const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
 const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
+
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -37,16 +40,13 @@ const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-
 #define REC_BLINK_DELAY 650
 #define REC_LIVE_INTERVAL 500
 
 #define CSV_FILE_NAME "data"
 #define TEXT_FILE_NAME "metadata"
 
-
 AsyncWebServer server(80);
-
 
 // HTML for the web page
 const char index_html[] PROGMEM = R"rawliteral(
@@ -106,12 +106,12 @@ const char index_html[] PROGMEM = R"rawliteral(
 
 
 enum Menus {
-  MENU_0,
-  MENU_1,
-  MENU_2,
-  MENU_3, 
-  MENU_4,
-  MENU_5
+  CUR_ALT,
+  MAX_ALT,
+  STORAGE,
+  WIFI, 
+  UNIT,
+  OFFSET
 };
 const int NUM_MENUS = 6;
 
@@ -137,7 +137,7 @@ String currentRecording;
 
 Adafruit_BMP3XX bmp;
 
-Menus menuId = MENU_0;
+Menus menuId = CUR_ALT;
 
 Timer recordDot, recordTimer;
 
@@ -182,23 +182,23 @@ void displayMenu(Menus id, bool clear=false, bool update=false) { // handles dis
   }
 
   switch(menuId) {
-    case MENU_0:
+    case CUR_ALT:
       display.println("Current");
       display.setCursor(10, 16);
       display.println("Altitude");
       break;
     
-    case MENU_1:
+    case MAX_ALT:
       display.println("Max");
       display.setCursor(10, 16);
       display.println("Altitude");
       break;
     
-    case MENU_2:
+    case STORAGE:
       display.println("Storage");
       break;
 
-    case MENU_4:
+    case UNIT:
       display.println("Switch to");
       display.setCursor(10, 16);
       if (useMeters) {
@@ -208,11 +208,11 @@ void displayMenu(Menus id, bool clear=false, bool update=false) { // handles dis
       }
       break;
 
-    case MENU_3:
+    case WIFI:
       display.println("Wifi");
       break;
 
-    case MENU_5:
+    case OFFSET:
       if (applyOffset) {
         display.print("Zero Altitude");
       } else {
@@ -251,7 +251,7 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
   display.setCursor(0, 0);
   switch(menuId) {
     
-    case MENU_0:
+    case CUR_ALT:
       display.println("Current Altitude");
       display.setTextSize(2);
       display.setCursor(67, 13);
@@ -268,7 +268,7 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
       display.setCursor(10, 20);
       break;
     
-    case MENU_1:
+    case MAX_ALT:
       display.println("Max Altitude");
       display.setTextSize(2);
       display.setCursor(67, 13);
@@ -285,7 +285,7 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
       display.setCursor(10, 20);
       break;
     
-    case MENU_2:
+    case STORAGE:
       display.println("Storage");
       display.setCursor(0, 10);
       display.print(numDirectories);
@@ -294,7 +294,7 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
       display.println(" Records Used");
       break;
 
-    case MENU_4:
+    case UNIT:
       if (useMeters) {
         useMeters = false;
       } else {
@@ -306,7 +306,7 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
       digitalWrite(SPEAKER_PIN, LOW);
       break;
 
-    case MENU_3:
+    case WIFI:
       display.print("Wifi");
       if (WiFi.status() == WL_CONNECTED) {
         display.setTextSize(1);
@@ -322,7 +322,7 @@ void displayScreen(int id, bool clear=false, bool update=false) { // handles dis
       }
       break;
 
-    case MENU_5:
+    case OFFSET:
       display.setTextSize(1);
       if (applyOffset) {
         applyOffset = false;
@@ -519,7 +519,7 @@ void loop() {
   if (btn1.isTripped()) { // Toggles between the display screen and the menu
     if (menuActive) {
       menuActive = false;
-      if (menuId == MENU_2) {
+      if (menuId == STORAGE) {
         // store num directories
         numDirectories = countRECDirectories(SD);
       }
@@ -536,7 +536,7 @@ void loop() {
         menuId = static_cast<Menus>(static_cast<int>(menuId) + 1);
         swipeDown();
       } else {
-        menuId = MENU_0;
+        menuId = CUR_ALT;
         swipeDown();
       }
     }
