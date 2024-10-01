@@ -521,6 +521,10 @@ void loop() {
       menuActive = false;
       if (menuId == STORAGE) {
         // store num directories
+        display.setTextSize(2);
+        display.setCursor(0, 16);
+        display.println("Loading...");
+        display.display();
         numDirectories = countRECDirectories(SD);
       }
       swipeRight();
