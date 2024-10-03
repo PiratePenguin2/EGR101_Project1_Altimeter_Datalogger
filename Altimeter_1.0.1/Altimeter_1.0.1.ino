@@ -124,9 +124,9 @@ bool captureActive = false;
 bool useMeters = false;
 bool applyOffset = false;
 double altOffset = 0.0;
-double currentPressure = 0.0;
 double currentAltitude = 0.0;
-double currentTemp = 0.0;
+//double currentPressure = 0.0;
+//double currentTemp = 0.0;
 String currentWebAltitude = "0.0";
 double maxAltitude = 0.0;
 int frameCount = 0;
@@ -499,8 +499,8 @@ void loop() {
   checkRecordDot();
 
   currentAltitude = (static_cast<int>(bmp.readAltitude(SEALEVELPRESSURE_HPA) * 100.0)) / 100.0;
-  currentPressure = bmp.readPressure();
-  currentTemp = bmp.readTemperature();
+  //currentPressure = bmp.readPressure();
+  //currentTemp = bmp.readTemperature();
 
   if (applyOffset) {
     currentAltitude = currentAltitude - altOffset;
@@ -745,10 +745,10 @@ bool createCSVFile(String csvFileName) { // create the csv file
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
       if (manualCapture) {
-        csvFile.println("Frame,Altitude(m),Pressure(HPa),Temperature(C)");  // CSV header
+        csvFile.println("Frame,Altitude(m)");//,Pressure(HPa),Temperature(C)");  // CSV header
       }
       else {
-        csvFile.println("Frame,Timestamp(mSec),Altitude(m),Pressure(HPa),Temperature(C)");  // CSV header
+        csvFile.println("Frame,Timestamp(mSec),Altitude(m)");//,Pressure(HPa),Temperature(C)");  // CSV header
       }
       csvFile.close();
       return true;
@@ -791,10 +791,10 @@ void storeCSVData() {
       csvFile.print(",");
     }
     csvFile.print(currentAltitude);  // Writing altitude value
-    csvFile.print(",");
+    /*csvFile.print(",");
     csvFile.print(currentPressure);  // Writing pressure value
     csvFile.print(",");
-    csvFile.print(currentTemp);      // Writing temperature value
+    csvFile.print(currentTemp);*/      // Writing temperature value
     
     csvFile.println();               // Move to the next line after the current data
     
