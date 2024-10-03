@@ -762,10 +762,12 @@ bool createTextFile(String txtFileName) {
     File txtFile = SD.open(txtFileName.c_str(), FILE_WRITE);
     if (txtFile) {
         //txtFile.println("Recording Date: 2024-09-19");
+        txtFile.println("Recording: " + currentRecording);
+        txtFile.println("Recording Mode: ");
+        manualCapture ? txtFile.println("Capture") : txtFile.println("Continuous");
         txtFile.println("Sensor: BMP388");
-        txtFile.println("Comments: Test recording with sample data.");
         txtFile.close();
-        Serial.println("Text file created and metadata written: " + txtFileName);
+        Serial.println("Text file created and info written: " + txtFileName);
         return true;
     } else {
         Serial.println("Failed to open text file: " + txtFileName);
@@ -808,7 +810,14 @@ void storeTextData() {
   File txtFile = SD.open(currentRecording + "/" + TEXT_FILE_NAME + ".txt", FILE_APPEND);
 
   if (txtFile) {
-    txtFile.println("a");
+    txtFile.println();
+    txtFile.println("Max Altitude: ");
+    txtFile.print(maxAltitude);
+    if(!manualCapture) {
+      txtFile.print("Duration: ");
+      txtFile.print(recordTimestamp);
+      txtFile.println("mSec");
+    }
     txtFile.close();
   } else {
     Serial.println("Error opening text file for writing.");
