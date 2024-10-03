@@ -768,7 +768,7 @@ bool createTextFile(String txtFileName) {
         manualCapture ? txtFile.println("Capture") : txtFile.println("Continuous");
         txtFile.println("Sensor: BMP388");
         txtFile.close();
-        
+
         Serial.println("Text file created and info written: " + txtFileName);
         return true;
     } else {
