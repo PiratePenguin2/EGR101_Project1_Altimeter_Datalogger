@@ -214,9 +214,9 @@ void displayMenu(Menus id, bool clear=false, bool update=false) { // handles dis
 
     case OFFSET:
       if (applyOffset) {
-        display.print("Zero Altitude");
+        display.print("Zero \nAltitude");
       } else {
-        display.print("Zero Altitude");
+        display.print("Reset \nAltitude");
       }
       display.display();
       break;
