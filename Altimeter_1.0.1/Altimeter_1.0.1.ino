@@ -44,7 +44,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET, false);
 #define REC_LIVE_INTERVAL 500
 
 #define CSV_FILE_NAME "data"
-#define TEXT_FILE_NAME "metadata"
+#define TEXT_FILE_NAME "info"
 
 AsyncWebServer server(80);
 
@@ -589,36 +589,9 @@ void loop() {
       }
     } else {
       if (manualCapture) {
-        captureActive = false;
-        display.clearDisplay();
-        display.setCursor(5, 12);
-        display.setTextSize(2);
-        display.println("REC STOP");
-        display.display();
-
-        digitalWrite(SPEAKER_PIN, HIGH);
-        delay(100);
-        delay(100);
-        digitalWrite(SPEAKER_PIN, LOW);
-
-        delay(500);
-        display.clearDisplay();
-
+        stopRecording();
       } else if (liveCapture) {
-        captureActive = false;
-        display.clearDisplay();
-        display.setCursor(5, 12);
-        display.setTextSize(2);
-        display.println("REC STOP");
-        display.display();
-
-        digitalWrite(SPEAKER_PIN, HIGH);
-        delay(100);
-        delay(100);
-        digitalWrite(SPEAKER_PIN, LOW);
-
-        delay(500);
-        display.clearDisplay();
+        stopRecording();
       }
     }
   }
@@ -627,20 +600,7 @@ void loop() {
   if (btn4.isTripped() && !menuActive) {
     if (liveCapture) {  // If recording in live capture mode
       if (captureActive) {  // If displaying recording symbol
-        captureActive = false;
-        display.clearDisplay();
-        display.setCursor(5, 12);
-        display.setTextSize(2);
-        display.println("REC STOP");
-        display.display();
-
-        digitalWrite(SPEAKER_PIN, HIGH);
-        delay(100);
-        delay(100);
-        digitalWrite(SPEAKER_PIN, LOW);
-
-        delay(500);
-        display.clearDisplay();
+        stopRecording();
       }
       else {
         createNewRecording("/REC_");
@@ -673,7 +633,7 @@ void loop() {
         createNewRecording("/REC_");
       }
 
-      storeData();
+      storeCSVData();
 
       display.clearDisplay();
       display.setCursor(15, 12);
@@ -699,7 +659,7 @@ void loop() {
 
   if (liveCapture && captureActive) {
     if (recordTimer.isFinished()) {
-      storeData();
+      storeCSVData();
       recordTimer.setTimer(REC_LIVE_INTERVAL);
     }
   }
@@ -719,36 +679,6 @@ void checkRecordDot() { // timer handler for the flashing record icon (required 
   if (recordDot.isFinished()) {
     showRecord = !showRecord;
     recordDot.setTimer(REC_BLINK_DELAY);
-  }
-}
-
-void storeData() {
-  // Open the CSV file in append mode
-  File csvFile = SD.open(currentRecording + "/DATA.csv", FILE_APPEND);
-  
-  if (csvFile) {
-    recordTimestamp = frameCount * REC_LIVE_INTERVAL;
-
-    // Write the currentAltitude to the file
-    csvFile.print(frameCount);       // Writing frame value
-    csvFile.print(",");              // Comma separator for CSV format
-    //csvFile.print((recordTimestamp / 1000) + ":" + (recordTimestamp % 1000));
-    csvFile.print(recordTimestamp);
-    //csvFile.print("00:00");
-    csvFile.print(",");              // Comma separator for CSV format
-    csvFile.print(currentAltitude);  // Writing altitude value
-    csvFile.print(",");              // Comma separator for CSV format
-    csvFile.print(currentPressure);  // Writing pressure value
-    csvFile.print(",");              // Comma separator for CSV format
-    csvFile.print(currentTemp);      // Writing temperature value
-    
-    csvFile.println();               // Move to the next line after the current data
-    
-    csvFile.close();                 // Close the file to ensure the data is saved
-    Serial.println("Data stored successfully.");
-    frameCount++;
-  } else {
-    Serial.println("Error opening file for writing.");
   }
 }
 
@@ -801,7 +731,7 @@ bool createRecording(String folderName) {
         return false;
     }
 
-    // Create and write to metadata TXT file
+    // Create and write to info TXT file
     String txtFileName = folderName + "/" + TEXT_FILE_NAME + ".txt";
     if (!createTextFile(txtFileName)) {
         Serial.println("Failed to create text file.");
@@ -814,9 +744,14 @@ bool createRecording(String folderName) {
 bool createCSVFile(String csvFileName) { // create the csv file
     File csvFile = SD.open(csvFileName.c_str(), FILE_WRITE);
     if (csvFile) {
-        csvFile.println("Frame,Timestamp,Altitude(m),Pressure(HPa),Temperature(C)");  // CSV header
-        csvFile.close();
-        return true;
+      if (manualCapture) {
+        csvFile.println("Frame,Altitude(m),Pressure(HPa),Temperature(C)");  // CSV header
+      }
+      else {
+        csvFile.println("Frame,Timestamp(mSec),Altitude(m),Pressure(HPa),Temperature(C)");  // CSV header
+      }
+      csvFile.close();
+      return true;
     } else {
         Serial.println("Failed to open CSV file: " + csvFileName);
         return false;
@@ -836,6 +771,66 @@ bool createTextFile(String txtFileName) {
         Serial.println("Failed to open text file: " + txtFileName);
         return false;
     }
+}
+
+void storeCSVData() {
+  // Open the CSV file in append mode
+  File csvFile = SD.open(currentRecording + "/" + CSV_FILE_NAME + ".csv", FILE_APPEND);
+  
+  if (csvFile) {
+    recordTimestamp = frameCount * REC_LIVE_INTERVAL;
+
+    // Write the currentAltitude to the file
+    csvFile.print(frameCount);       // Writing frame value
+    csvFile.print(",");
+    //csvFile.print((recordTimestamp / 1000) + ":" + (recordTimestamp % 1000));
+    if (!manualCapture) {
+      csvFile.print(recordTimestamp);
+      csvFile.print(",");
+    }
+    csvFile.print(currentAltitude);  // Writing altitude value
+    csvFile.print(",");
+    csvFile.print(currentPressure);  // Writing pressure value
+    csvFile.print(",");
+    csvFile.print(currentTemp);      // Writing temperature value
+    
+    csvFile.println();               // Move to the next line after the current data
+    
+    csvFile.close();                 // Close the file to ensure the data is saved
+    Serial.println("Data stored successfully.");
+    frameCount++;
+  } else {
+    Serial.println("Error opening CSV file for writing.");
+  }
+}
+
+void storeTextData() {
+  File txtFile = SD.open(currentRecording + "/" + TEXT_FILE_NAME + ".txt", FILE_APPEND);
+
+  if (txtFile) {
+    txtFile.println("a");
+    txtFile.close();
+  } else {
+    Serial.println("Error opening text file for writing.");
+  }
+}
+
+void stopRecording() {
+  storeTextData();
+  captureActive = false;
+  display.clearDisplay();
+  display.setCursor(5, 12);
+  display.setTextSize(2);
+  display.println("REC STOP");
+  display.display();
+
+  digitalWrite(SPEAKER_PIN, HIGH);
+  delay(100);
+  delay(100);
+  digitalWrite(SPEAKER_PIN, LOW);
+
+  delay(500);
+  display.clearDisplay();
 }
 
 void initWebServer(AsyncWebServer &server, String &currentWebAltitude) { // init the web server, heavily modified from source ChatGPT
