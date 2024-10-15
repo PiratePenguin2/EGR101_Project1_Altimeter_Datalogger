@@ -29,9 +29,11 @@
 #define RECORDING_SLOTS 40
 
 // Wifi credentials (required)
-const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
-const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
+//const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
+//const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
 
+const char* ssid = "Moto Edge 2022";       // Replace with your Wi-Fi SSID
+const char* password = "chettywifi"; // Replace with your Wi-Fi password
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -214,9 +216,9 @@ void displayMenu(Menus id, bool clear=false, bool update=false) { // handles dis
 
     case OFFSET:
       if (applyOffset) {
-        display.print("Zero \nAltitude");
+        display.print("Reset\n Altitude");
       } else {
-        display.print("Reset \nAltitude");
+        display.print("Zero\n Altitude");
       }
       display.display();
       break;
@@ -762,11 +764,13 @@ bool createTextFile(String txtFileName) {
     File txtFile = SD.open(txtFileName.c_str(), FILE_WRITE);
     if (txtFile) {
         //txtFile.println("Recording Date: 2024-09-19");
-        txtFile.println("Recording: " + currentRecording);
-        txtFile.println("Recording Mode: ");
+        txtFile.print("Recording: ");
+        txtFile.println(currentRecording);
+        txtFile.print("Recording Mode: ");
         manualCapture ? txtFile.println("Capture") : txtFile.println("Continuous");
         txtFile.println("Sensor: BMP388");
         txtFile.close();
+
         Serial.println("Text file created and info written: " + txtFileName);
         return true;
     } else {
@@ -811,8 +815,8 @@ void storeTextData() {
 
   if (txtFile) {
     txtFile.println();
-    txtFile.println("Max Altitude: ");
-    txtFile.print(maxAltitude);
+    txtFile.print("Max Altitude: ");
+    txtFile.println(maxAltitude);
     if(!manualCapture) {
       txtFile.print("Duration: ");
       txtFile.print(recordTimestamp);
