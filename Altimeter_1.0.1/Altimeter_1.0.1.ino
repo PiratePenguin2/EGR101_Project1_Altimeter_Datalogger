@@ -15,6 +15,7 @@
 #include "FS.h"
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <ESPmDNS.h>
 
 // Pin declarations
 #define BUTTON_1_PIN 26
@@ -29,9 +30,11 @@
 #define RECORDING_SLOTS 40
 
 // Wifi credentials (required)
-const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
-const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
+//const char* ssid = "CBU-LANCERS";       // Replace with your Wi-Fi SSID
+//const char* password = "L@ncerN@tion"; // Replace with your Wi-Fi password
 
+const char* ssid = "Moto Edge 2022";       // Replace with your Wi-Fi SSID
+const char* password = "chettywifi"; // Replace with your Wi-Fi password
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
@@ -473,10 +476,19 @@ void setup() {
   btn4.attach(BUTTON_4_PIN);
 
   WiFi.begin(ssid, password); // Connect to Wi-Fi
+  delay(1000);
   
   Serial.println("Connected to WiFi!");
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());  // Print the IP address
+
+  if (!MDNS.begin("altimeter")) {  // Replace "esp32" with your desired hostname
+      Serial.println("Error setting up MDNS responder!");
+      while (1) {
+          delay(1000);
+      }
+  }
+  Serial.println("MDNS responder started");
 
   // Initialize the web server
   initWebServer(server, currentWebAltitude);
